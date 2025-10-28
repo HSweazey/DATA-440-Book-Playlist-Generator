@@ -9,8 +9,8 @@ from typing import List, Dict, Any
 # ==============================================================================
 
 # NOTE: REPLACE THESE WITH YOUR ACTUAL SPOTIFY DEVELOPER CREDENTIALS
-CLIENT_ID = 'YOUR_CLIENT_ID' 
-CLIENT_SECRET = 'YOUR_CLIENT_SECRET'
+CLIENT_ID = "b4e4a0fb88344c8d81d1419afa71d7a9"
+CLIENT_SECRET = "574971712e62498e881e2af5416fc5ae"
 
 # Initialize the Spotipy client
 try:
@@ -40,12 +40,12 @@ SEARCH_QUERIES = [
 ]
 
 # Filtering Cutoffs (Controls dataset quality and size)
-POPULARITY_CUTOFF = 40                 # Minimum popularity (0-100)
-INSTRUMENTALNESS_CUTOFF = 0.8          # Minimum instrumentalness (0.0-1.0)
-SPEECHINESS_CUTOFF = 0.3               # Maximum speechiness (0.0-1.0)
+POPULARITY_CUTOFF = 30                 # Minimum popularity (0-100)
+INSTRUMENTALNESS_CUTOFF = 0.5          # Minimum instrumentalness (0.0-1.0)
+SPEECHINESS_CUTOFF = 0.4               # Maximum speechiness (0.0-1.0)
 
 # API parameters
-MAX_TRACKS_PER_QUERY = 500             # Target max tracks to fetch per query (500 * 12 queries = ~6000 potential tracks)
+MAX_TRACKS_PER_QUERY = 10             # Target max tracks to fetch per query (500 * 12 queries = ~6000 potential tracks)
 PAGINATION_LIMIT = 50                  # The 'limit' parameter for a single API call (Spotify's maximum)
 ALL_TRACK_IDS = set()                  # Tracks unique IDs to avoid duplicates across queries
 
@@ -84,12 +84,18 @@ def extract_filtered_tracks(
                     ALL_TRACK_IDS.add(track['id'])
             
             # 2. Get Audio Features for the filtered tracks
+
             if track_ids_to_process:
-                # Use a small delay before fetching features to respect rate limits
-                time.sleep(0.5) 
-                audio_features_list = sp.audio_features(track_ids_to_process)
+                time.sleep(1.0) # Increased delay (Step 1)
                 
-                # 3. Apply Instrumentalness and Speechiness filters
+                try:
+                    audio_features_list = sp.audio_features(track_ids_to_process)
+                except spotipy.exceptions.SpotifyException as e:
+                    print(f"  ⚠️ Rate Limit Hit (403 or similar). Waiting 10s and skipping this batch. Error: {e}")
+                    time.sleep(10) # Wait a long time if an error occurs
+                    continue # Skip to the next iteration (next page/query)
+                
+                # ... rest of the filtering code
                 for features in audio_features_list:
                     if features: 
                         # Filtering logic
@@ -128,7 +134,8 @@ def extract_filtered_tracks(
             # 4. Move to the next page
             if results['tracks']['next'] and tracks_fetched < max_limit:
                 results = sp.next(results['tracks'])
-                time.sleep(1) # Be sure to pause before the next API search call
+                # Increase the delay significantly between large pagination steps
+                time.sleep(2)
             else:
                 results = None # End the loop for this query
 

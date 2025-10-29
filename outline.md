@@ -6,7 +6,7 @@ Project Title: ?
 
 Team: Hannah Sweazey and Ella Roach
 
-Duration: 3 weeks
+Duration: 4 weeks
 
 **Goal:** Automatically generate a music playlist matched to a book’s genre and remaining reading time using data from the Spotify API and a book data source such as Goodreads or the Library of Congress API.
 

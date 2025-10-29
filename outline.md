@@ -181,9 +181,11 @@ def main():
 
 | Week                                 | Focus                   | Tasks                                                                                                                                                                                                  | Owner                                                        |
 | ------------------------------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
-| **Week 1: Data Acquisition & Setup** | Setup & ingestion       | - Configure repo and UV environment<br>- Implement `spotify_api.py` (mock data if needed)<br>- Implement `books_api.py` (Goodreads or LoC)<br>- Create `config.py` for keys<br>- Validate data schemas | Dev A: Spotify<br>Dev B: Books                               |
-| **Week 2: Core Logic & Mapping**     | Processing pipeline     | - Implement `genre_mapping.py` (keyword or embedding-based)<br>- Implement `reading_time.py` (using avg reading speed)<br>- Draft `playlist_generator.py` to select songs                              | Dev A: Genre mapping<br>Dev B: Reading time & playlist logic |
-| **Week 3: Integration & Validation** | Orchestration & testing | - Build `main.py` CLI<br>- Add visualization<br>- Write tests in `/tests`<br>- Document in README + Quickstart<br>- Validate success criteria (duration accuracy, genre match)                         | Both (pair review)                                           |
+| **Week 1: Data Acquisition** | Setup & ingestion       |<br>- Implement `spotify_api.py` (mock data if needed)<br>- Implement `books_api.py` (Goodreads or LoC) | Dev A: Spotify<br>Dev B: Books  
+| **Week 2: Setup** | Setup & ingestion       | - Configure repo and UV environment<br>- Create `config.py` for keys<br>- Validate data schemas | Dev A: UV <br>Dev B: Config                                |
+| **Week 3: Core Logic & Mapping**     | Processing pipeline     | - Implement `genre_mapping.py` (keyword or embedding-based)<br>- Implement `reading_time.py` (using avg reading speed)<br>- Draft `playlist_generator.py` to select songs                              | Dev A: Genre mapping<br>Dev B: Reading time & playlist logic |
+| **Week 4: Integration & Validation** | Orchestration & testing | - Build `main.py` CLI<br>- Add visualization<br>- Write tests in `/tests`<br>- Document in README + Quickstart<br>- Validate success criteria (duration accuracy, genre match)                         | Both (pair review)                                           |
+
 
 
 ## 8. Optional Extensions 

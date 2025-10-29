@@ -80,6 +80,9 @@ readbeats/
 
 ### spotify_api.py
 
+**Optional Backup:** [Existing Spotify Dataset](https://huggingface.co/datasets/maharshipandya/spotify-tracks-dataset)
+- 114k rows, 
+
 ```python
 def fetch_spotify_data(query: str, limit: int = 50) -> pd.DataFrame
 ```
@@ -92,6 +95,12 @@ def fetch_spotify_data(query: str, limit: int = 50) -> pd.DataFrame
 DataFrame with columns: ['track_name', 'artist', 'genre', 'duration_ms', 'popularity']
 
 ### books_api.py
+
+**Optional Backups:** 
+- [Existing Hugging Face Dataset](https://huggingface.co/datasets/booksouls/goodreads-book-descriptions?utm_source=chatgpt.com)
+- 1.02m rows 
+- [Existing Kaggle Dataset](https://www.kaggle.com/datasets/jealousleopard/goodreadsbooks?utm_source=chatgpt.com)
+- 10k rows, updated regularly 
 
 ```python
 def fetch_book_metadata(title: str) -> dict

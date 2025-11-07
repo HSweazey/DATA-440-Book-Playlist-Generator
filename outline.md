@@ -49,7 +49,7 @@ readbeats/
 ├── src/
 │   ├── data_ingestion/
 │   │   ├── spotify_api.py        # Pulls Spotify data via API
-│   │   └── books_api.py          # Pulls book metadata
+│   │   └── books_csv.py          # Pulls book data (backup)
 │   │
 │   ├── processing/
 │   │   ├── genre_mapping.py      # NLP-based genre/keyword matching

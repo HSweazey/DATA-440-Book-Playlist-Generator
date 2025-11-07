@@ -21,6 +21,7 @@ Duration: 4 weeks
 | Input           | Type            | Description                                                                               |
 | --------------- | --------------- | ----------------------------------------------------------------------------------------- |
 | `book_title`    | `str`           | Title of the book the user is reading                                                     |
+| `book_author`    | `str`, optional          | Author of the book the user is reading                                                     |
 | `current_page`  | `int`, optional | Current page number; default is 0                                                         |
 | `book_data.csv` | `CSV`           | Cached or pre-downloaded dataset of books (title, author, genre, page count, description) |
 | `spotify.csv`   | `CSV`           | Cached or pre-downloaded dataset of Spotify track metadata (title, artist, genre, duration, popularity)     |
@@ -42,7 +43,7 @@ Duration: 4 weeks
 readbeats/
 │
 ├── data/                         # Data and cache directory
-│   ├── spotify.csv
+│   ├── /split_books/goodreads0.csv - goodreads9.csv
 │   ├── books.csv
 │   └── playlists/
 │

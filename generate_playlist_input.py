@@ -8,7 +8,7 @@ os.environ["GEMINI_API_KEY"] = GEMINI_API_KEY
 LINE_BREAK = '-' * 50 + '\n'
 
 def generate_playlist_input():
-    print("\n📚 Gemini Playlist Keyword Generator 📚")
+    print("\n📚 Yay Playlist Keyword Generation 📚")
 
     book = input("Enter the book title: ")
     author = input("Enter the author (optional): ")
@@ -33,7 +33,7 @@ def generate_playlist_input():
     # --- Robust parsing ---
     text_output = "[]"
 
-    # 1️⃣ Try candidates first
+    # 1 Try candidates first
     try:
         candidates = result.get("candidates", [])
         if candidates:
@@ -41,11 +41,11 @@ def generate_playlist_input():
     except Exception:
         pass
 
-    # 2️⃣ Fallback to top-level 'response' key if candidates is empty
+    # 2 Fallback to top-level 'response' key if candidates is empty
     if text_output == "[]" and "response" in result:
         text_output = str(result["response"]).strip()
 
-    # 3️⃣ Ensure text_output is a proper stringified list
+    # 3 Ensure text_output is a proper stringified list
     if not text_output.startswith('['):
         text_output = f"[{text_output}]"
 

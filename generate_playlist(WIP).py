@@ -30,6 +30,8 @@ def generate_playlist():
     # Step 1: Get Gemini keywords and page info
     data = generate_playlist_input()
 
+    print(data)
+
     current_page = data.get("current_page", 0)
     total_pages = data.get("total_pages", 0)
     pages_left = max(0, total_pages - current_page)

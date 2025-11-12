@@ -1,25 +1,34 @@
+import os
+import json
 from clients import GeminiClient
 
-def test_gemini_basic():
-    try:
-        # Initialize client with the lightweight model
-        client = GeminiClient(model=GeminiClient.Models.LITE)
+# -------------------------------------------------------
+# CONFIGURATION
+# -------------------------------------------------------
+# Real key (if you have one) — or dummy key for testing.
+# Replace this with a real one temporarily when verifying locally.
+GEMINI_API_KEY = "AIzaSyA1M372by3Ha6hlOZRmSygZmtlU3q2nyxI"
 
-        # Set a simple request prompt
-        client.set_request("List three genres similar to fantasy books.")
+# Inject into environment for subprocess calls.
+os.environ["GEMINI_API_KEY"] = GEMINI_API_KEY
 
-        # Run the request
-        client.send_request()
+# -------------------------------------------------------
+# TEST PROMPT
+# -------------------------------------------------------
+prompt_text = "List three genres similar to fantasy books."
 
-        # Get the result
-        result = client.get_result()
+# -------------------------------------------------------
+# RUN TEST
+# -------------------------------------------------------
+try:
+    client = GeminiClient(model=GeminiClient.Models.LITE)
+    client.set_request(prompt_text)
+    client.send_request()
+    result = client.get_result()
 
-        print("\n✅ Gemini client ran successfully!")
-        print("Response:", result)
+    print("✅ Gemini client ran successfully!")
+    print(json.dumps(result, indent=2))
 
-    except Exception as e:
-        print("\n❌ Error during Gemini client test:")
-        print(e)
-
-if __name__ == "__main__":
-    test_gemini_basic()
+except Exception as e:
+    print("❌ Error during Gemini client test:")
+    print(str(e))

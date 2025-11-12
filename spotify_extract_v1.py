@@ -45,7 +45,7 @@ INSTRUMENTALNESS_CUTOFF = 0.5          # Minimum instrumentalness (0.0-1.0)
 SPEECHINESS_CUTOFF = 0.4               # Maximum speechiness (0.0-1.0)
 
 # API parameters
-MAX_TRACKS_PER_QUERY = 10             # Target max tracks to fetch per query (500 * 12 queries = ~6000 potential tracks)
+MAX_TRACKS_PER_QUERY = 1             # Target max tracks to fetch per query (500 * 12 queries = ~6000 potential tracks)
 PAGINATION_LIMIT = 50                  # The 'limit' parameter for a single API call (Spotify's maximum)
 ALL_TRACK_IDS = set()                  # Tracks unique IDs to avoid duplicates across queries
 
@@ -86,7 +86,7 @@ def extract_filtered_tracks(
             # 2. Get Audio Features for the filtered tracks
 
             if track_ids_to_process:
-                time.sleep(1.0) # Increased delay (Step 1)
+                time.sleep(10.0) # Increased delay (Step 1)
                 
                 try:
                     audio_features_list = sp.audio_features(track_ids_to_process)
@@ -135,7 +135,7 @@ def extract_filtered_tracks(
             if results['tracks']['next'] and tracks_fetched < max_limit:
                 results = sp.next(results['tracks'])
                 # Increase the delay significantly between large pagination steps
-                time.sleep(2)
+                time.sleep(10)
             else:
                 results = None # End the loop for this query
 
@@ -163,7 +163,7 @@ if sp is not None:
 
     # Save the final dataset
     if not df_instrumental.empty:
-        FILE_NAME = 'instrumental_tracks_data_large.csv'
+        FILE_NAME = 'instrumental_tracks.csv'
         df_instrumental.to_csv(FILE_NAME, index=False)
         print("\n" + "="*40)
         print(f"🎉 SUCCESS! Extracted **{len(df_instrumental)}** unique instrumental tracks.")

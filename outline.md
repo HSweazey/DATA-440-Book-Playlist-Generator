@@ -43,8 +43,11 @@ Duration: 4 weeks
 readbeats/
 │
 ├── data/                         # Data and cache directory
-│   ├── /split_books/goodreads0.csv - goodreads9.csv
-│   ├── books.csv
+│   ├── split_books/
+│   │   ├── goodreads0.csv 
+│   │   ├── ...
+│   │   └── goodreads9.csv
+│   │ 
 │   └── playlists/
 │
 ├── src/

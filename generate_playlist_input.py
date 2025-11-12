@@ -2,10 +2,7 @@ import os
 import json
 from clients import GeminiClient
 
-# -------------------------------------------------------
-# CONFIGURATION
-# -------------------------------------------------------
-# Real key (if you have one) — or dummy key for testing.
+# CONFIGURATION (copy and paste from testing file)
 GEMINI_API_KEY = "AIzaSyA1M372by3Ha6hlOZRmSygZmtlU3q2nyxI"
 
 # Inject into environment for subprocess calls.
@@ -30,9 +27,9 @@ def generate_playlist_input():
     # Build Gemini prompt
     prompt = f"""
     Given the book "{book}"{f" by {author}" if author else ""},
-    please provide a Python list of exactly four descriptive lowercase keywords 
-    that capture the atmosphere or mood of songs matching the story's tone. 
-    Respond ONLY with the list, no extra text or explanation.
+    provide exactly four descriptive keywords that best capture the atmosphere 
+    or mood of songs that would match the story's tone.
+    Respond ONLY as a Python list of four lowercase words, comma-separated.
     """
 
     # Call Gemini
@@ -43,28 +40,24 @@ def generate_playlist_input():
     # Parse result
     result = client.get_result()
 
-    # Try to extract just the keyword string safely
+    # Try to extract text safely
     try:
         candidates = result.get("candidates", [])
         if candidates:
-            keywords_text = candidates[0]["content"]["parts"][0]["text"]
+            text_output = candidates[0]["content"]["parts"][0]["text"]
         else:
-            keywords_text = "[]"
+            text_output = str(result)
     except Exception as e:
-        keywords_text = "[]"
-        print(f"[Error parsing Gemini output] {e}\nRaw result: {json.dumps(result, indent=2)}")
-
-    # Remove leading/trailing whitespace
-    keywords_text = keywords_text.strip()
+        text_output = f"[Error parsing output] {e}\nRaw result: {json.dumps(result, indent=2)}"
 
     print(LINE_BREAK)
     print(f"🎧 Playlist input generated for '{book}':\n")
-    print(keywords_text)
+    print(text_output)
     print(LINE_BREAK)
 
-    # Return all relevant info in the correct format
+    # Return all relevant info as a dictionary
     return {
-        "keywords": keywords_text,
+        "keywords": text_output,
         "book": book,
         "author": author,
         "current_page": current_page,

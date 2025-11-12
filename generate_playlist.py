@@ -20,6 +20,7 @@ def compute_playlist_length(current_page: int, total_pages: int) -> int:
     return max(1, math.ceil(pages_left / AVG_SONG_LENGTH_MIN))
 
 def generate_playlist():
+    """Generate a Spotify playlist based on book keywords from Gemini."""
     # Step 1: Get Gemini keywords and page info
     data = generate_playlist_input()
 
@@ -30,17 +31,30 @@ def generate_playlist():
     num_tracks = compute_playlist_length(current_page=current_page, total_pages=total_pages)
 
     # Step 3: Parse Gemini response safely into a list
-    gemini_response = data.get("keywords", "[]")
+    gemini_response_str = data.get("response", "[]")  # <-- MUST use "response"
+    if not gemini_response_str:
+        print("No response returned from Gemini.")
+        return
+
+    # Remove wrapping quotes if present
+    gemini_response_str = gemini_response_str.strip()
+    if gemini_response_str.startswith('"') and gemini_response_str.endswith('"'):
+        gemini_response_str = gemini_response_str[1:-1]
+
+    # Convert the string to a list of keywords
     keywords_list = []
     try:
-        parsed = ast.literal_eval(gemini_response)
-        if isinstance(parsed, list):
-            keywords_list = [str(k).strip() for k in parsed if k]
-    except Exception:
-        pass
+        # Remove square brackets, then split by comma
+        for k in gemini_response_str.strip("[]").split(","):
+            clean_k = k.strip().strip("'\"")
+            if clean_k:
+                keywords_list.append(clean_k)
+    except Exception as e:
+        print(f"Warning: failed to parse Gemini response: {e}")
+        return
 
     if not keywords_list:
-        print("No keywords generated; cannot search Spotify.")
+        print(f"No keywords generated from Gemini response: {gemini_response_str}")
         return
 
     # Prepare keywords string for Spotify search

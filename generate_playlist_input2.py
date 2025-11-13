@@ -11,17 +11,19 @@ def generate_playlist_input():
     print("\n📚 Yay Playlist Keyword Generation 📚")
 
     book = input("Enter the book title: ")
-    author = input("Enter the author (optional): ")
+    author = input("Enter the author: ")
     total_pages_input = input("Enter total number of pages (optional, press enter if unknown): ")
 
     total_pages = int(total_pages_input) if total_pages_input.strip() else 0
-
+# chosen from this list: acoustic, alternative, ambient, classical, chill, country, dance, electronic, folk, hip-hop, indie-pop, jazz, latin, metal, new-age, pop, r-n-b, rock, sad, sleep, songwriter, study, synth-pop.
     prompt = f"""
-    Given the book "{book}"{f" by {author}" if author else ""},
-    provide exactly four descriptive keywords that best capture the musical atmosphere 
-    or mood of songs that would match the story's tone. 
-    These words will be fed to Spotify's API to find songs that best represent the book.
-    Respond ONLY as a Python list of four lowercase words, comma-separated.
+    Analyze the book "{book}"{f" by {author}" if author else ""}.
+    Your response must contain **only** a single Python list of **exactly three** lowercase, keywords that capture the story's tone and mood.
+    The first keyword **must** be a valid Spotify genre.
+    The second and third keywords **must** relate to broader instrumental styles of music.
+    Respond **ONLY** as a single-line Python list without any extra characters or words.
+    
+    Example Output: ['pop', 'ambient', 'lofi']
     """
 
     client = GeminiClient()

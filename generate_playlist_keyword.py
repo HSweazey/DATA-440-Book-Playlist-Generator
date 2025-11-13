@@ -1,8 +1,9 @@
 import math
 import ast
+import time
 from generate_playlist_input import generate_playlist_input
-from spotipy.oauth2 import SpotifyClientCredentials
 import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
 from KEYS import CLIENT_ID, CLIENT_SECRET
 
 # -------------------------------------------------------
@@ -12,15 +13,59 @@ auth_manager = SpotifyClientCredentials(client_id = CLIENT_ID, client_secret = C
 sp = spotipy.Spotify(auth_manager=auth_manager)
 
 # Average song length in minutes
-AVG_SONG_LENGTH_MIN = 3
+AVG_SONG_LENGTH_MIN = 5
+AVG_PAGE_SPEED_MIN = 2
 
-def compute_playlist_length(current_page: int, total_pages: int) -> int:
+# Constants for Batching
+BATCH_SIZE = 20 # Number of tracks to request per API call
+WAIT_TIME_SECONDS = 0.5 # Wait time between batches to prevent overwhelming the API
+
+def compute_playlist_length(total_pages: int = 100) -> int:
     """
     Compute number of songs based on pages left and average song length.
     """
 
-    pages_left = max(0, total_pages - current_page)
-    return max(1, math.ceil(pages_left / AVG_SONG_LENGTH_MIN))
+    readtime = total_pages * AVG_PAGE_SPEED_MIN
+
+    print(max(1, math.ceil(readtime / AVG_SONG_LENGTH_MIN)))
+    return (max(1, math.ceil(readtime / AVG_SONG_LENGTH_MIN)))
+
+def search_spotify_in_batches(sp, keywords_input: str, num_tracks: int) -> list:
+    """
+    Searches Spotify for the required number of tracks in batches,
+    with a small delay between each call.
+    """
+    all_tracks = []
+    tracks_to_fetch = num_tracks
+    offset = 0
+
+    while tracks_to_fetch > 0:
+        limit = min(BATCH_SIZE, tracks_to_fetch)
+        print(f"Searching Spotify for {limit} tracks with offset {offset}...")
+
+        try:
+            results = sp.search(q=keywords_input, type="track", limit=limit, offset=offset)
+            tracks_batch = results.get('tracks', {}).get('items', [])
+            all_tracks.extend(tracks_batch)
+
+            if not tracks_batch:
+                print("No more tracks found in this batch.")
+                break # Stop if no tracks are returned
+
+            tracks_to_fetch -= len(tracks_batch)
+            offset += len(tracks_batch)
+
+            # Wait time before the next request
+            if tracks_to_fetch > 0:
+                print(f"Waiting for {WAIT_TIME_SECONDS} seconds...")
+                time.sleep(WAIT_TIME_SECONDS)
+
+        except Exception as e:
+            print(f"Error searching Spotify in batch: {e}")
+            break
+
+    return all_tracks
+
 
 def generate_playlist():
     """
@@ -32,12 +77,10 @@ def generate_playlist():
 
     print(data)
 
-    current_page = data.get("current_page", 0)
     total_pages = data.get("total_pages", 0)
-    pages_left = max(0, total_pages - current_page)
 
     # Step 2: Compute number of tracks
-    num_tracks = compute_playlist_length(current_page=current_page, total_pages=total_pages)
+    num_tracks = int(compute_playlist_length(total_pages=total_pages))
 
     # Step 3: Parse Gemini response safely into a list
     gemini_response = data.get("response", [])
@@ -64,29 +107,18 @@ def generate_playlist():
 
     keywords_input = ",".join(keywords_list)
 
-    # Step 4: Search Spotify for initial playlist
-    try:
-        results = sp.search(q=keywords_input, type="track", limit=num_tracks)
-        tracks = results.get('tracks', {}).get('items', [])
-    except Exception as e:
-        print(f"Error searching Spotify: {e}")
-        return
+    # Step 4: Search Spotify for initial playlist in batches
+    tracks = search_spotify_in_batches(sp, keywords_input, num_tracks)
 
     if not tracks:
         print(f"No tracks found for keywords: {keywords_input}")
         return
 
-    # Step 5: Check total playlist duration
-    total_duration_min = sum(track['duration_ms'] for track in tracks) / 60000  # convert ms to minutes
-    if total_duration_min < pages_left:
-        print(f"Playlist duration ({total_duration_min:.1f} min) is less than pages left ({pages_left}). Adding 10 more songs.")
-        try:
-            extra_results = sp.search(q=keywords_input, type="track", limit=10)
-            extra_tracks = extra_results.get('tracks', {}).get('items', [])
-            tracks.extend(extra_tracks)
-            total_duration_min = sum(track['duration_ms'] for track in tracks) / 60000
-        except Exception as e:
-            print(f"Error adding extra songs: {e}")
+    # Step 5: Check total playlist duration (Simplified: no extra songs added here
+    # to keep the logic focused on the batched search, as the original logic was
+    # flawed/incomplete for adding extra songs by searching with the same query)
+    total_duration_ms = sum(track['duration_ms'] for track in tracks)
+    total_duration_min = total_duration_ms / 60000  # convert ms to minutes
 
     # Step 6: Print track info interactively
     print(f"\n🎶 Generated playlist ({len(tracks)} tracks, approx. {total_duration_min:.1f} minutes) for keywords: {keywords_input}\n")

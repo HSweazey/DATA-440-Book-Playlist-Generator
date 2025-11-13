@@ -21,7 +21,7 @@ def generate_playlist_input():
     Your response must contain **only** a single Python list of **exactly three** lowercase, keywords that capture the story's tone and mood.
     The first keyword **must** be a valid Spotify genre.
     The second and third keywords **must** relate to broader instrumental styles of music.
-    Respond **ONLY** as a single-line Python list without any extra characters or words.
+    Respond **ONLY** as a single-line Python list without any extra characters or words. Do not offer any other input or explanation.
     
     Example Output: ['pop', 'ambient', 'lofi']
     """

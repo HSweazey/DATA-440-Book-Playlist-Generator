@@ -1,7 +1,7 @@
 import math
 import ast
 import time
-from generate_playlist_input import generate_playlist_input
+from generate_playlist_input2 import generate_playlist_input
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from KEYS import CLIENT_ID, CLIENT_SECRET
@@ -69,16 +69,24 @@ def validate_and_extract_keywords(gemini_response_str: str) -> dict | None:
         'all_keywords': keywords_list
     }
 
-def _build_query(genre: str, mood_keywords_string: str, include_mood: bool = True) -> str:
+def _build_query(genre: str, mood_keywords_string: str, query_type: str) -> str:
     """
     Constructs the Spotify search query string based on the genre and optional mood keywords.
-    
-    This function implements the cascading logic for the search string.
     """
-    mood_part = mood_keywords_string if include_mood else ""
-    genre_part = f"genre:{genre}" # Use explicit genre filter for better focus
+    if query_type == "full":
+        # Attempt 1: All keywords (most specific)
+        keywords = f"{genre} {mood_keywords_string}"
+    elif query_type == "mood_only":
+        # Attempt 2: Mood keywords only (intermediate step)
+        keywords = mood_keywords_string
+    elif query_type == "fallback":
+        # Attempt 3: Guaranteed fallback genre
+        keywords = FALLBACK_GENRE
+    else:
+        keywords = "" # Should not happen
     
-    return f"instrumental {mood_part} {genre_part}".strip()
+    # Return instrumental + space-separated keywords
+    return f"instrumental {keywords}".strip()
 
 
 def _run_batched_search(query: str, num_tracks: int):
@@ -121,25 +129,25 @@ def _run_batched_search(query: str, num_tracks: int):
 
 def fetch_search_tracks(genre: str, mood_keywords_string: str, num_tracks: int):
     """
-    Fetches the requested number of tracks using a 3-step cascading retry logic.
+    Fetches the requested number of tracks using a 3-step cascading search strategy.
     """
     
     # Define the three cascading attempts
     attempts = [
-        # Attempt 1: Most Specific (Gemini's Genre + Mood Keywords)
-        (genre, mood_keywords_string, True, "Most Specific (Genre + Mood)"),
+        # Attempt 1: Most Specific (All Keywords)
+        (genre, mood_keywords_string, "full", "Most Specific (All Keywords)"), 
         
-        # Attempt 2: Less Specific (Gemini's Genre ONLY)
-        (genre, "", False, "Genre Only (Less Specific)"), 
+        # Attempt 2: Intermediate (Mood Keywords Only)
+        (genre, mood_keywords_string, "mood_only", "Intermediate (Mood Only)"),
         
-        # Attempt 3: Safe Fallback (Ambient Genre ONLY)
-        (FALLBACK_GENRE, "", False, "Safe Fallback (Ambient Only)")
+        # Attempt 3: Safe Fallback (Ambient Genre Only)
+        (FALLBACK_GENRE, "", "fallback", "Safe Fallback (Ambient Only)")
     ]
     
-    for i, (current_genre, current_moods, include_mood, attempt_name) in enumerate(attempts):
+    for i, (current_genre, current_moods, query_type, attempt_name) in enumerate(attempts):
         
         # Build the specific query for this attempt
-        current_query = _build_query(current_genre, current_moods, include_mood)
+        current_query = _build_query(current_genre, current_moods, query_type)
         
         # Display attempt and query
         print(f"\n--- Attempt {i+1}: {attempt_name} ---")

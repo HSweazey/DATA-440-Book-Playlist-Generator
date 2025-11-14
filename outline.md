@@ -2,7 +2,7 @@
 
 ## 1. Project Overview 
 
-Project Title: ?
+Project Title: Book Playlist Generator 
 
 Team: Hannah Sweazey and Ella Roach
 
@@ -22,9 +22,9 @@ Duration: 4 weeks
 | --------------- | --------------- | ----------------------------------------------------------------------------------------- |
 | `book_title`    | `str`           | Title of the book the user is reading                                                     |
 | `book_author`    | `str`, optional          | Author of the book the user is reading                                                     |
-| `current_page`  | `int`, optional | Current page number; default is 0                                                         |
-| `book_data.csv` | `CSV`           | Cached or pre-downloaded dataset of books (title, author, genre, page count, description) |
-| `spotify.csv`   | `CSV`           | Cached or pre-downloaded dataset of Spotify track metadata (title, artist, genre, duration, popularity)     |
+| `page_number`  | `int`, optional | Current page number; default is 0                                                         |
+| `book_data.csv` | `CSV`           | Cached or pre-downloaded dataset of books (title, author, genre, page count, description)(fallback in case user does not have Gemini API key working) |
+| `spotify.csv`   | `CSV`           | Cached dataset of Spotify track metadata (title, artist, genre, duration, popularity)(fallback in case user does not have Spotify or Spotify API dummy key not working)     |
 
 
 ## 4. Success Criteria (Validation) (?)
@@ -32,7 +32,7 @@ Duration: 4 weeks
 | Metric                                                               | Target |
 | -------------------------------------------------------------------- | ------ |
 | Playlist duration within ±10% of reading time estimate               | ✅      |
-| Correct genre match ≥ 80% (verified by keyword/embedding similarity) | ✅      |
+| Correct genre match ≥ 80% (verified by keyword similarity) | ✅      |
 | Script runtime under 60 seconds (for local data)                     | ✅      |
 | Fully reproducible pipeline with `uv run main.py`                    | ✅      |
 
@@ -40,30 +40,32 @@ Duration: 4 weeks
 
 ```python
 
-readbeats/
+FINAL/
 │
 ├── data/                         # Data and cache directory
-│   ├── split_books/
+│   ├── split_books/              # Fallback option 
 │   │   ├── goodreads0.csv 
 │   │   ├── ...
 │   │   └── goodreads9.csv
 │   │ 
-│   └── playlists/
-│
+│   └── playlists/                # Fallback option 
+│       ├── x
+│       ├── ...
+│       └── x  
 ├── src/
 │   ├── data_ingestion/
-│   │   ├── spotify_api.py        # Pulls Spotify data via API
-│   │   └── books_csv.py          # Pulls book data (backup)
+│   │   └── spotify_extract.py          # Pulls Spotify data via API
 │   │
 │   ├── processing/
-│   │   ├── genre_mapping.py      # NLP-based genre/keyword matching
-│   │   ├── reading_time.py       # Estimates reading time from page count
-│   │   └── playlist_generator.py # Builds playlist matching duration & genre
+│   │   ├── generate_playlist_mood.py      
+│   │   ├── generate_playlist_input.py  # Generates keywords from Gemini as input for the playlist generator     
+│   │   └── playlist_generator.py       # Builds playlist matching duration & genre
 │   │
 │   ├── visualization/
-│   │   └── playlist_plot.py      # Optional visualization tools
+│   │   └── playlist_plot.py      # Optional visualization tools (WIP)
 │   │
 │   ├── utils/
+│   │   ├── KEYS.py               # Key storage 
 │   │   ├── io_utils.py           # CSV/JSON read-write helpers
 │   │   └── config.py             # API keys, constants, directories
 │   │
@@ -80,117 +82,20 @@ readbeats/
 └── uv.lock
 ```
 
-## 6. Function Specifications 
-
-### spotify_api.py
-
-**Optional Backup:** [Existing Spotify Dataset](https://huggingface.co/datasets/maharshipandya/spotify-tracks-dataset)
-- 114k rows, 
-
-```python
-def fetch_spotify_data(query: str, limit: int = 50) -> pd.DataFrame
-```
-
-**Input:** 
-- query: keyword or genre to search
-- limit: number of tracks to fetch
-
-**Output:**
-DataFrame with columns: ['track_name', 'artist', 'genre', 'duration_ms', 'popularity']
-
-### books_api.py
-
-**Optional Backups:** 
-- [Existing Hugging Face Dataset](https://huggingface.co/datasets/booksouls/goodreads-book-descriptions?utm_source=chatgpt.com)
-- 1.02m rows 
-- [Existing Kaggle Dataset](https://www.kaggle.com/datasets/jealousleopard/goodreadsbooks?utm_source=chatgpt.com)
-- 10k rows, updated regularly 
-
-```python
-def fetch_book_metadata(title: str) -> dict
-```
-
-**Input:** 
-- title: book title 
-
-**Output:**
-Dictionary with keys: {'title', 'author', 'genre', 'page_count', 'description'}
-
-### genre_mapping.py
-
-```python
-def map_book_to_music_genre(book_genre: str, description: str) -> List[str]
-```
-
-**Input:** 
-- book_genre: literary genre label
-- description: textual summary of the book
-
-**Output:**
-List of relevant music genres (['fantasy soundtrack', 'orchestral', 'ambient'])
-
-### reading_time.py
-
-```python
-def estimate_reading_time(page_count: int, current_page: int, wpm: int = 250) -> float
-```
-
-**Input:** 
-- page_count: total number of pages
-- current_page: user’s current page
-- wpm: words per minute (default 250)
-
-**Output:**
-Estimated reading time in minutes
-
-### playlist_generator.py
-
-```python
-def generate_playlist(spotify_df: pd.DataFrame, target_genres: List[str], target_duration_min: float) -> pd.DataFrame
-```
-
-**Input:** 
-- spotify_df: DataFrame of available tracks
-- target_genres: list of matched genres
-- target_duration_min: desired total playlist length
-
-**Output:**
-DataFrame of selected tracks (playlist.csv)
-
-### playlist_plot.py
-
-```python
-def plot_playlist_duration(playlist_df: pd.DataFrame, target_duration: float) -> None
-```
-
-**Input:** 
-- playlist_df: DataFrame of playlist
-- target_duration: target duration in minutes- limit: number of tracks to fetch
-
-**Output:**
-Saved PNG visualization in /data/playlists/plots
-
-### main.py
-
-```python
-def main():
-    """
-    Entry point: orchestrates input, data fetching, genre mapping, 
-    reading time estimation, playlist generation, and output.
-    """
-```
 
 
-## 7. Implementation Plan 
+## 6. Implementation Plan 
 
 | Week                                 | Focus                   | Tasks                                                                                                                                                                                                  | Owner                                                        |
 | ------------------------------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
 | **Week 1: Data Acquisition** | Setup & ingestion       |<br>- Implement `spotify_api.py` (mock data if needed)<br>- Implement `books_api.py` (Goodreads or LoC) | Dev A: Spotify<br>Dev B: Books  
-| **Week 2: Setup** | Setup & ingestion       | - Configure repo and UV environment<br>- Create `config.py` for keys<br>- Validate data schemas | Dev A: UV <br>Dev B: Config                                |
-| **Week 3: Core Logic & Mapping**     | Processing pipeline     | - Implement `genre_mapping.py` (keyword or embedding-based)<br>- Implement `reading_time.py` (using avg reading speed)<br>- Draft `playlist_generator.py` to select songs                              | Dev A: Genre mapping<br>Dev B: Reading time & playlist logic |
-| **Week 4: Integration & Validation** | Orchestration & testing | - Build `main.py` CLI<br>- Add visualization<br>- Write tests in `/tests`<br>- Document in README + Quickstart<br>- Validate success criteria (duration accuracy, genre match)                         | Both (pair review)                                           |
+| **Week 2: Setup** | Setup & ingestion       | - Configure repo and UV environment<br>- Create `config.py` and `KEYS.py`<br>- Validate data schemas<br>- Draft `playlist_generator.py` and helper functions to select songs  | Dev A: UV and main function <br>Dev B: Config and helpers                                |
+| **Week 3: Core Logic & Mapping**     | Processing pipeline     | - Finetune `playlist_generator.py` (keyword/genre based)<br>- Validate success criteria<br>- Implement dummy APIs for Spotify and Gemini access by users                           | Dev A: Finetuning main function <br>Dev B: Dummy APIs and export logic |
+| **Week 4: Integration & Validation** | Orchestration & testing | - Build `main.py` CLI<br>- Add optional user interface<br>- Document in README + Quickstart                         | Both (pair review)                                           |
 
 
 
-## 8. Optional Extensions 
+## 7. Optional Extensions 
+- aesthetically pleasing user interface with extra time
+- explore export direct to spotify playlist if possible 
 - option to export to youtube playlist if no spotify account 

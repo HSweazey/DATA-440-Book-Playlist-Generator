@@ -36,7 +36,7 @@ def compute_playlist_length(current_page: int = 0, total_pages: int = 100) -> in
     print(f"Calculated reading time: {readtime} minutes. Target tracks: {num_tracks}")
     return num_tracks
 
-def validate_and_extract_keywords(gemini_response_str: str) -> dict | None:
+def validate_and_extract_keywords(gemini_response_str: str): #-> dict | None: (weird error on Ella's computer)
     """
     Safely parses the Gemini keyword list string and extracts the primary genre and mood keywords.
     """

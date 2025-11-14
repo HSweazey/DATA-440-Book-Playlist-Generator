@@ -21,10 +21,10 @@ Duration: 4 weeks
 | Input           | Type            | Description                                                                               |
 | --------------- | --------------- | ----------------------------------------------------------------------------------------- |
 | `book_title`    | `str`           | Title of the book the user is reading                                                     |
-| `book_author`    | `str`, optional          | Author of the book the user is reading                                                     |
-| `page_number`  | `int`, optional | Current page number; default is 0                                                         |
-| `book_data.csv` | `CSV`           | Cached or pre-downloaded dataset of books (title, author, genre, page count, description)(fallback in case user does not have Gemini API key working) |
-| `spotify.csv`   | `CSV`           | Cached dataset of Spotify track metadata (title, artist, genre, duration, popularity)(fallback in case user does not have Spotify or Spotify API dummy key not working)     |
+| `book_author`    | `str`          | Author of the book the user is reading                                                     |
+| `total_page_number`  | `int`, optional | Total number of pages in book; default is ?                                                        |
+| `book_data.csv` | `CSV`           | Pre-downloaded dataset of books (title, author, genre, page count, description)<br>(fallback in case user does not have Gemini API key working) |
+| `spotify.csv`   | `CSV`           | Cached dataset of Spotify track metadata (title, artist, genre, duration, popularity)<br>(fallback in case user does not have Spotify or Spotify API dummy key not working)     |
 
 
 ## 4. Success Criteria (Validation) (?)
@@ -88,7 +88,7 @@ FINAL/
 
 | Week                                 | Focus                   | Tasks                                                                                                                                                                                                  | Owner                                                        |
 | ------------------------------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
-| **Week 1: Data Acquisition** | Setup & ingestion       |<br>- Implement `spotify_api.py` (mock data if needed)<br>- Implement `books_api.py` (Goodreads or LoC) | Dev A: Spotify<br>Dev B: Books  
+| **Week 1: Data Acquisition** | Setup & ingestion       |<br>- Implement `spotify_api.py`<br>- Implement `books_api.py` (Goodreads or LoC) | Dev A: Spotify<br>Dev B: Books  
 | **Week 2: Setup** | Setup & ingestion       | - Configure repo and UV environment<br>- Create `config.py` and `KEYS.py`<br>- Validate data schemas<br>- Draft `playlist_generator.py` and helper functions to select songs  | Dev A: UV and main function <br>Dev B: Config and helpers                                |
 | **Week 3: Core Logic & Mapping**     | Processing pipeline     | - Finetune `playlist_generator.py` (keyword/genre based)<br>- Validate success criteria<br>- Implement dummy APIs for Spotify and Gemini access by users                           | Dev A: Finetuning main function <br>Dev B: Dummy APIs and export logic |
 | **Week 4: Integration & Validation** | Orchestration & testing | - Build `main.py` CLI<br>- Add optional user interface<br>- Document in README + Quickstart                         | Both (pair review)                                           |

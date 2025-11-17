@@ -5,7 +5,7 @@ import pandas as pd
 from dummy_csv_prompting import generate_genre_keywords # New input file
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-from KEYS import CLIENT_ID, CLIENT_SECRET
+from utils.KEYS import CLIENT_ID, CLIENT_SECRET
 import sys
 import re
 

@@ -1,5 +1,5 @@
 import os
-from clients.gemini_loader import load_gemini_client
+from gemini_loader import load_gemini_client
 
 LINE_BREAK = '-' * 50 + '\n'
 

@@ -2,10 +2,10 @@ import math
 import ast
 import time
 import pandas as pd
-from dummy_csv_prompting import generate_genre_keywords # New input file
+from dummy_csv_prompting import generate_genre_keywords
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-from utils.KEYS import CLIENT_ID, CLIENT_SECRET
+from src.utils.KEYS import CLIENT_ID, CLIENT_SECRET
 import sys
 import re
 
@@ -17,7 +17,7 @@ try:
     sp = spotipy.Spotify(auth_manager=auth_manager)
     sp.search(q="test", type="track", limit=1)
 except Exception as e:
-    print(f"Error: Failed to initialize Spotify API connection. Error: {e}")
+    print(f"Error: Failed to initialize Spotify API connection. Ensure CLIENT_ID/SECRET are correct and valid. Error: {e}")
     sys.exit(1)
 
 
@@ -33,14 +33,29 @@ FIXED_GENRE_BASE = 'ambient' # Fixed instrumental base
 
 def validate_and_extract_keywords(gemini_response_str: str) -> str | None:
     """
-    Safely parses the Gemini keyword list string and extracts the combined mood keywords.
+    Safely parses the Gemini dictionary string, extracts the keyword list, and returns the combined string.
     """
     try:
-        keywords_list = ast.literal_eval(gemini_response_str)
+        # Safely evaluate the string as a Python literal (dictionary or list wrapper)
+        params = ast.literal_eval(gemini_response_str)
         
-        # Ensure it's a list and has at least 3 elements
+        # Robustly handle list wrapper (e.g., if output is [{'keywords': [...]}]
+        if isinstance(params, list):
+            if not params:
+                print("Error: Gemini response is an empty list.")
+                return None
+            params = params[0] # Extract the dictionary from the list
+
+        if not isinstance(params, dict):
+            print(f"Error: Gemini response could not be extracted as a dictionary. Received type: {type(params)}")
+            return None
+        
+        # --- NEW LOGIC: Extract the list from the 'keywords' key ---
+        keywords_list = params.get('keywords')
+        
+        # Check for required keyword list structure
         if not isinstance(keywords_list, list) or len(keywords_list) < 3:
-            print(f"Error: Gemini response is not a list of 3 keywords. Received: {keywords_list}")
+            print("Error: Missing or invalid 'keywords' list (needs 3 strings).")
             return None
             
     except Exception as e:
@@ -105,7 +120,7 @@ def _run_batched_search(query: str, num_tracks: int, offset_start: int = 0):
 
     return all_tracks, None 
 
-def export_to_csv(tracks: list, genre: str, mood_keywords: str):
+def export_to_csv(tracks: list, target_genre: str, mood_keywords: str):
     """
     Converts track list into a DataFrame and exports it to a CSV file.
     """
@@ -113,6 +128,7 @@ def export_to_csv(tracks: list, genre: str, mood_keywords: str):
         print("No tracks to export.")
         return
 
+    # Extract relevant fields
     data = []
     for track in tracks:
         if 'artists' in track and track['artists'] and 'album' in track:
@@ -129,8 +145,8 @@ def export_to_csv(tracks: list, genre: str, mood_keywords: str):
 
     df = pd.DataFrame(data)
     
-    # Clean filename (e.g., ambient_fantasy_epic_cinematic_backup.csv)
-    safe_genre = genre.lower().replace(' ', '_')
+    # Clean filename (e.g., fantasy_ambient_epic_backup.csv)
+    safe_genre = target_genre.lower().replace(' ', '_')
     safe_mood = mood_keywords.replace(' ', '_').replace(',', '')
     filename = f"{safe_genre}_{safe_mood}_backup.csv"
     
@@ -142,7 +158,7 @@ def export_to_csv(tracks: list, genre: str, mood_keywords: str):
 if __name__ == "__main__":
     
     # --- STEP 1: Define Target Genres ---
-    TARGET_GENRES = ["Fantasy", "Mystery", "Historical Fiction", "Sci-Fi", "Romance"]
+    TARGET_GENRES = ["Fantasy"]
     
     print("\n--- Spotify Backup CSV Generator (Automated) ---")
     print(f"Processing {len(TARGET_GENRES)} genres, targeting {TARGET_TRACKS_PER_CSV} tracks each.")

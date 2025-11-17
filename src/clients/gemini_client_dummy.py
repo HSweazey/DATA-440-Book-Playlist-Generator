@@ -1,5 +1,5 @@
 import json
-from clients.gemini_client_base import GeminiClientBase
+from .gemini_client_base import GeminiClientBase
 
 DUMMY_DATA_PATH = "dummy_data.json"
 

@@ -1,6 +1,7 @@
 import os
 import json
 from clients import GeminiClient
+from KEYS import GEMINI_API_KEY
 
 GEMINI_API_KEY = "AIzaSyA1M372by3Ha6hlOZRmSygZmtlU3q2nyxI"
 os.environ["GEMINI_API_KEY"] = GEMINI_API_KEY
@@ -8,23 +9,27 @@ os.environ["GEMINI_API_KEY"] = GEMINI_API_KEY
 LINE_BREAK = '-' * 50 + '\n'
 
 def generate_playlist_input():
-    print("\n📚 Yay Playlist Keyword Generation 📚")
+    print("\n📚 Gemini Playlist Keyword Generation 📚")
 
     book = input("Enter the book title: ")
     author = input("Enter the author: ")
     total_pages_input = input("Enter total number of pages (optional, press enter if unknown): ")
 
     total_pages = int(total_pages_input) if total_pages_input.strip() else 0
-# chosen from this list: acoustic, alternative, ambient, classical, chill, country, dance, electronic, folk, hip-hop, indie-pop, jazz, latin, metal, new-age, pop, r-n-b, rock, sad, sleep, songwriter, study, synth-pop.
+
+    # --- UPDATED PROMPT: Requesting 3 pure mood/style keywords ---
     prompt = f"""
     Analyze the book "{book}"{f" by {author}" if author else ""}.
-    Your response must contain **only** a single Python list of **exactly three** lowercase, keywords that capture the story's tone and mood.
-    The first keyword **must** be a valid Spotify genre.
-    The second and third keywords **must** relate to broader instrumental styles of music.
-    Respond **ONLY** as a single-line Python list without any extra characters or words. Do not offer any other input or explanation.
+
+    Your response must be a single Python dictionary with two keys:
+    1. 'mood_keywords': A list of exactly three unique, lowercase, descriptive mood and style keywords that capture the story's tone and atmosphere. These keywords will be used to search for instrumental ambient music.
+    2. 'score_query': (OPTIONAL) If the book has a well-known movie or TV adaptation, include this key with the official name of the instrumental score or soundtrack album (e.g., 'Dune Soundtrack 2021' or 'The Lord of the Rings: The Two Towers Score'). If NO adaptation exists, omit this key entirely.
+
+    Respond **ONLY as a single-line Python dictionary** without any extra characters or words.
     
-    Example Output: ['pop', 'ambient', 'lofi']
+    Example (With Score): {{'mood_keywords': ['heroic', 'epic', 'grand'], 'score_query': 'Dune Soundtrack 2021'}}
     """
+    # --- End Prompt ---
 
     client = GeminiClient()
     client.set_request(prompt)

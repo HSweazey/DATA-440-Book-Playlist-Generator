@@ -1,7 +1,7 @@
 import os
 import json
 from clients import GeminiClient
-from KEYS import GEMINI_API_KEY
+from utils.KEYS import GEMINI_API_KEY
 
 os.environ["GEMINI_API_KEY"] = GEMINI_API_KEY
 

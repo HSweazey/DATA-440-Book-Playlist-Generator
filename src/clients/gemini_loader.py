@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
-from gemini_client_real import GeminiClientReal
-from gemini_client_dummy import GeminiClientDummy
+from clients.gemini_client_real import GeminiClientReal
+from clients.gemini_client_dummy import GeminiClientDummy
 
 def load_gemini_client():
     """

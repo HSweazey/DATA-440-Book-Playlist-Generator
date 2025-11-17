@@ -1,7 +1,7 @@
 # gemini_client_real.py
 import subprocess
 import json
-from gemini_client_base import GeminiClientBase
+from clients.gemini_client_base import GeminiClientBase
 
 class GeminiClientReal(GeminiClientBase):
     def __init__(self, api_key: str, model="gemini-2.5-flash-lite"):

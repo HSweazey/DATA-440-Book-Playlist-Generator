@@ -4,7 +4,7 @@ import time
 from generate_playlist_input_genre_mood import generate_playlist_input
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-from KEYS import CLIENT_ID, CLIENT_SECRET
+from utils.KEYS import CLIENT_ID, CLIENT_SECRET
 
 # -------------------------------------------------------
 # SPOTIFY SETUP

@@ -1,10 +1,10 @@
 import math
 import ast
 import time
-from generate_playlist_input_v5 import generate_playlist_input
+from processing.generate_playlist_input_v5 import generate_playlist_input
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-from KEYS import CLIENT_ID, CLIENT_SECRET
+from utils.KEYS import CLIENT_ID, CLIENT_SECRET
 import re 
 
 # -------------------------------------------------------

@@ -3,7 +3,6 @@ import json
 from clients import GeminiClient
 from KEYS import GEMINI_API_KEY
 
-GEMINI_API_KEY = "AIzaSyA1M372by3Ha6hlOZRmSygZmtlU3q2nyxI"
 os.environ["GEMINI_API_KEY"] = GEMINI_API_KEY
 
 LINE_BREAK = '-' * 50 + '\n'

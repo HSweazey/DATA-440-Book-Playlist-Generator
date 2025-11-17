@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from .gemini_client_real import GeminiClientReal
 from .gemini_client_dummy import GeminiClientDummy
-from src.utils.KEYS import * # <-- remove when env working, hardcoded return line
+#from src.utils.KEYS import * # <-- remove when env working, hardcoded return line
 
 def load_gemini_client():
     """
@@ -37,4 +37,4 @@ def load_gemini_client():
         client.get_result = get_result_dict
         return client
 
-    return GeminiClientReal(api_key=GEMINI_API_KEY)
+    return GeminiClientReal(api_key=key)

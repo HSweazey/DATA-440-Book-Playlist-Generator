@@ -1,14 +1,24 @@
 import json
 from gemini_client_base import GeminiClientBase
 
+DUMMY_DATA_PATH = "dummy_data.json"
+
 class GeminiClientDummy(GeminiClientBase):
-    def __init__(self, json_path = "dummy_gemini.json"):
-        with open(json_path, "r") as f:
-            self.data = json.load(f)
+    def __init__(self):
+        print("Using DUMMY Gemini client")
+        self.prompt = None
+        self.response_data = None
 
-    def send_request(self, prompt: str):
-        # do nothing; dummy response already loaded
-        pass
+    def set_request(self, prompt: str):
+        self.prompt = prompt  # not used, but needed for symmetry
 
-    def get_response(self):
-        return self.data.get("response", None)
+    def send_request(self):
+        try:
+            with open(DUMMY_DATA_PATH, "r") as f:
+                self.response_data = json.load(f)
+        except Exception as e:
+            print(f"Warning loading dummy file: {e}")
+            self.response_data = {"response": "['ambient', 'cinematic', 'ethereal']"}
+
+    def get_result(self):
+        return self.response_data

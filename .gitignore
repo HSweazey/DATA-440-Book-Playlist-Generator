@@ -182,3 +182,12 @@ cython_debug/
 
 # Mac OS
 .DS_Store
+
+# Prevent conda environments from ever being tracked
+.conda/
+env/
+.venv/
+venv/
+*/bin/
+*/lib/
+*.egg-info/

@@ -1,5 +1,0 @@
-#!/Users/ellaroach/Desktop/gity/DATA-440-Final/.conda/bin/python3.12
-
-from idlelib.pyshell import main
-if __name__ == '__main__':
-    main()

@@ -106,7 +106,7 @@ def _build_query(primary_keywords: str, query_type: str) -> str:
     """
     
     # Aggressive Anti-Vocal Keywords (used in every search)
-    ANTI_VOCAL_KEYWORDS = "instrumental no vocals score"
+    ANTI_VOCAL_KEYWORDS = "instrumental"
     
     if query_type == "full":
         # Mood Search Attempt 1: Full Query (Fixed Genre Base + All Mood Keywords)

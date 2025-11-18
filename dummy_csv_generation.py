@@ -8,6 +8,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
 from src.utils.KEYS import CLIENT_ID, CLIENT_SECRET
 import sys
 import re
+import os # Added for path and directory operations
 
 # -------------------------------------------------------
 # SPOTIFY SETUP (Using credentials from KEYS.py)
@@ -71,10 +72,11 @@ def _build_query(primary_genre: str, mood_keywords_string: str) -> str:
     """
     Constructs the Spotify search query string for the CSV backup.
     """
-    ANTI_VOCAL_KEYWORDS = "instrumental no vocals score"
+    ANTI_VOCAL_KEYWORDS = "instrumental"
     keywords = f"{primary_genre} {mood_keywords_string}"
     
-    return f"{ANTI_VOCAL_KEYWORDS} {keywords}".strip()
+    return f"{ANTI_VOCAL_KEYWORDS} {keywords}".strip() # <-- Put back in
+    #return f"lofi classical soundtrack score"  # <--- remove
 
 
 def _run_batched_search(query: str, num_tracks: int, offset_start: int = 0):
@@ -123,6 +125,7 @@ def _run_batched_search(query: str, num_tracks: int, offset_start: int = 0):
 def export_to_csv(tracks: list, target_genre: str, mood_keywords: str):
     """
     Converts track list into a DataFrame and exports it to a CSV file.
+    It ensures the target directory exists before writing the file.
     """
     if not tracks:
         print("No tracks to export.")
@@ -145,10 +148,22 @@ def export_to_csv(tracks: list, target_genre: str, mood_keywords: str):
 
     df = pd.DataFrame(data)
     
-    # Clean filename (e.g., fantasy_ambient_epic_backup.csv)
+    # Define the output directory and filename
+    output_dir = "./data" 
     safe_genre = target_genre.lower().replace(' ', '_')
-    safe_mood = mood_keywords.replace(' ', '_').replace(',', '')
-    filename = f"{safe_genre}_{safe_mood}_backup.csv"
+    filename = f"{output_dir}/{safe_genre}_backup.csv" # <-- put back in
+    #filename = f"{output_dir}/instrumental_backup.csv"
+
+    # --- Directory Check and Creation ---
+    # The exist_ok=True argument prevents an error if the directory already exists.
+    try:
+        # os.makedirs works with relative paths and creates all necessary intermediate directories
+        os.makedirs(output_dir, exist_ok=True)
+        print(f"Ensured output directory exists: {os.path.abspath(output_dir)}")
+    except OSError as e:
+        print(f"Error creating directory {output_dir}. Check file system permissions: {e}")
+        return
+    # ---------------------------------------------
     
     df.to_csv(filename, index=False)
     
@@ -158,8 +173,10 @@ def export_to_csv(tracks: list, target_genre: str, mood_keywords: str):
 if __name__ == "__main__":
     
     # --- STEP 1: Define Target Genres ---
-    TARGET_GENRES = ["Fantasy"]
-    
+    TARGET_GENRES = ["Thriller"]
+    #["Fantasy", "Science Fiction", "Mystery","Thriller","Romance","Historical Fiction",
+                    # "Horror","Young Adult","Contemporary Fiction","Literary Fiction","Dystopian",
+                    # "Textbook","Classics","Graphic Novels","Biography"]
     print("\n--- Spotify Backup CSV Generator (Automated) ---")
     print(f"Processing {len(TARGET_GENRES)} genres, targeting {TARGET_TRACKS_PER_CSV} tracks each.")
     

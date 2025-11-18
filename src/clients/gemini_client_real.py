@@ -1,4 +1,3 @@
-# src/clients/gemini_client_real.py
 import subprocess
 import json
 import os

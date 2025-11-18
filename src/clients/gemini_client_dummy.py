@@ -1,7 +1,8 @@
 import json
+import os
 from .gemini_client_base import GeminiClientBase
 
-DUMMY_DATA_PATH = "dummy_data.json"
+DUMMY_DATA_PATH = os.path.join(os.path.dirname(__file__), "dummy_data.json")
 
 class GeminiClientDummy(GeminiClientBase):
     def __init__(self):

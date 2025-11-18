@@ -1,40 +1,66 @@
+# src/clients/gemini_loader.py
 import os
-from dotenv import load_dotenv
+import json
 from .gemini_client_real import GeminiClientReal
 from .gemini_client_dummy import GeminiClientDummy
-#from src.utils.KEYS import * # <-- remove when env working, hardcoded return line
+
+# Path to JSON file containing real Gemini API key
+KEY_FILE = os.path.join(os.path.dirname(__file__), "keys", "gemini_key.json")
+
+
+def load_real_key():
+    """Load real Gemini API key from JSON file."""
+    print(f"Looking for key file at: {KEY_FILE}")
+    if not os.path.exists(KEY_FILE):
+        print("Key file not found.")
+        return None
+
+    try:
+        with open(KEY_FILE, "r") as f:
+            data = json.load(f)
+            api_key = data.get("api_key")
+            if api_key and api_key.strip():
+                print("Loaded key from JSON: FOUND")
+                return api_key
+            else:
+                print("Loaded key from JSON: EMPTY or INVALID")
+                return None
+    except Exception as e:
+        print(f"Error reading key file: {e}")
+        return None
+
 
 def load_gemini_client():
     """
-    Returns a Gemini client (real or dummy) depending on the API key.
-    The dummy client will now return Python dictionaries directly for easier parsing.
+    Load the real Gemini client if a valid key exists.
+    Otherwise, fall back to the dummy client.
     """
-    load_dotenv()
-    key = os.getenv("GEMINI_API_KEY", None)
+    api_key = load_real_key()
 
-    if key in (None, "", "DUMMY", "dummy", "test"):
-        client = GeminiClientDummy()
-        
-        # Wrap its get_result to always return a dict
-        original_get_result = client.get_result
-        def get_result_dict():
-            res = original_get_result()
-            if isinstance(res, str):
-                # Attempt to eval the string safely
-                try:
-                    parsed = eval(res)
-                    if isinstance(parsed, list):
-                        # Wrap list in dict with proper key
-                        return {'mood_keywords': parsed}
-                    elif isinstance(parsed, dict):
-                        return parsed
-                except Exception:
-                    # fallback to default empty dict
-                    return {}
-            elif isinstance(res, dict):
-                return res
-            return {}
-        client.get_result = get_result_dict
-        return client
+    if api_key:
+        print("🔑 Using REAL Gemini API key from gemini_key.json")
+        return GeminiClientReal(api_key=api_key)
 
-    return GeminiClientReal(api_key=key)
+    print("⚠️ No real key found — using DUMMY Gemini client")
+    client = GeminiClientDummy()
+
+    # Ensure dummy get_result always returns a dict
+    original_get_result = client.get_result
+
+    def get_result_dict():
+        res = original_get_result()
+        if isinstance(res, dict):
+            return res
+
+        try:
+            parsed = eval(res)
+            if isinstance(parsed, list):
+                return {"mood_keywords": parsed}
+            if isinstance(parsed, dict):
+                return parsed
+        except Exception:
+            pass
+        return {}
+
+    client.get_result = get_result_dict
+    return client

@@ -1,11 +1,14 @@
+#python3.12 -m src.processing.generate_playlist_fixed_g 
+
 import math
 import ast
 import time
-from generate_playlist_input_v5 import generate_playlist_input
+import re 
+
+from src.processing.generate_playlist_input_v5 import generate_playlist_input
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-from utils.KEYS import CLIENT_ID, CLIENT_SECRET
-import re 
+from src.utils.KEYS import CLIENT_ID, CLIENT_SECRET  # <- ensure utils has __init__.py
 
 # -------------------------------------------------------
 # SPOTIFY SETUP

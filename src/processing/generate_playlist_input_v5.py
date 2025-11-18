@@ -1,5 +1,6 @@
+#python3.12 -m src.processing.generate_playlist_input_v5
 import os
-from clients.gemini_loader import load_gemini_client
+from src.clients.gemini_loader import load_gemini_client
 
 LINE_BREAK = '-' * 50 + '\n'
 

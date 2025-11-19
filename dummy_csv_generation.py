@@ -75,8 +75,8 @@ def _build_query(primary_genre: str, mood_keywords_string: str) -> str:
     ANTI_VOCAL_KEYWORDS = "instrumental"
     keywords = f"{primary_genre} {mood_keywords_string}"
     
-    return f"{ANTI_VOCAL_KEYWORDS} {keywords}".strip() # <-- Put back in
-    #return f"lofi classical soundtrack score"  # <--- remove
+    #return f"{ANTI_VOCAL_KEYWORDS} {keywords}".strip() # <-- Put back in
+    return f"ambient instrumental lofi classical soundtrack score"  # <--- remove
 
 
 def _run_batched_search(query: str, num_tracks: int, offset_start: int = 0):
@@ -151,8 +151,8 @@ def export_to_csv(tracks: list, target_genre: str, mood_keywords: str):
     # Define the output directory and filename
     output_dir = "./data" 
     safe_genre = target_genre.lower().replace(' ', '_')
-    filename = f"{output_dir}/{safe_genre}_backup.csv" # <-- put back in
-    #filename = f"{output_dir}/instrumental_backup.csv"
+    #filename = f"{output_dir}/{safe_genre}_backup.csv" # <-- put back in
+    filename = f"{output_dir}/instrumental_backup.csv"
 
     # --- Directory Check and Creation ---
     # The exist_ok=True argument prevents an error if the directory already exists.
@@ -173,7 +173,7 @@ def export_to_csv(tracks: list, target_genre: str, mood_keywords: str):
 if __name__ == "__main__":
     
     # --- STEP 1: Define Target Genres ---
-    TARGET_GENRES = ["Thriller"]
+    TARGET_GENRES = ["Romance"]
     #["Fantasy", "Science Fiction", "Mystery","Thriller","Romance","Historical Fiction",
                     # "Horror","Young Adult","Contemporary Fiction","Literary Fiction","Dystopian",
                     # "Textbook","Classics","Graphic Novels","Biography"]

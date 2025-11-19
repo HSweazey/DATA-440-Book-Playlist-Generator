@@ -11,7 +11,7 @@ def generate_genre_keywords(target_genre: str):
     prompt = f"""
     Analyze the broad genre of '{target_genre}' and its typical mood, tone, and atmosphere.
     Your task is to generate three unique, lowercase, descriptive mood and style keywords suitable for instrumental ambient music that would capture the essence of this genre.
-    Respond **ONLY as a single-line Python dictionary** containing exactly one key: 'keywords', whose value is a list of exactly three strings.
+    Respond **ONLY as a single-line Python DICTIONARY** containing exactly one key: 'keywords', whose value is a list of exactly three strings.
 
     Example Output for 'Fantasy': {{'keywords': ['epic', 'cinematic', 'medieval']}}
     """

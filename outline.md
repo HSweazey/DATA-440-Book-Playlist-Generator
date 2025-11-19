@@ -22,7 +22,7 @@ Duration: 4 weeks
 | --------------- | --------------- | ----------------------------------------------------------------------------------------- |
 | `book_title`    | `str`           | Title of the book the user is reading                                                     |
 | `book_author`    | `str`          | Author of the book the user is reading                                                     |
-| `total_page_number`  | `int`, optional | Total number of pages in book; default is ?                                                        |
+| `total_page_number`  | `int`, optional | Total number of pages in book; default is 300                                                       |
 
 
 ## 4. Success Criteria (Validation) (?)

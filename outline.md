@@ -76,9 +76,8 @@ FINAL/
 │   │   ├── csv_playlist_generation.py      
 │   │   ├── WIP_generate_playlist_csv.py      
 
-│   │   ├── generate_playlist_mood.py      
-│   │   ├── generate_playlist_input.py  # Generates keywords from Gemini as input for the playlist generator     
-│   │   └── playlist_generator.py       # Builds playlist matching duration & genre
+│   │   ├── generate_playlist_input_v5.py  # Generates keywords from Gemini as input for the playlist generator     
+│   │   └── generate_playlist_fixed_g.py       # Builds playlist matching duration & genre
 │   │
 │   ├── visualization/
 │   │   └── playlist_plot.py      # Optional visualization tools (WIP)

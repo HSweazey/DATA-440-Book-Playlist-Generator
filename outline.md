@@ -42,19 +42,37 @@ Duration: 4 weeks
 
 FINAL/
 │
-├── data/                         # Data and cache directory
-│   ├── split_books/              # Fallback option 
-│   │   ├── goodreads0.csv 
-│   │   ├── ...
-│   │   └── goodreads9.csv
-│   │ 
-│   └── playlists/                # Fallback option 
-│       ├── x
-│       ├── ...
-│       └── x  
+├── data/                           # Data and cache directory
+│   ├── biography_backup.csv 
+│   ├── classics_backup.csv 
+│   ├── contemporary_fiction_backup.csv 
+│   ├── dystopian_backup.csv 
+│   ├── fantasy_backup.csv 
+│   ├── graphic_novels_backup.csv 
+│   ├── historical_fiction_backup.csv 
+│   ├── horror_backup.csv 
+│   ├── instrumental_backup.csv 
+│   ├── literary_fiction_backup.csv 
+│   ├── mystery_backup.csv 
+│   ├── romance_backup.csv 
+│   ├── science_fiction_backup.csv 
+│   ├── textbook_backup.csv 
+│   ├── thriller_backup.csv 
+│   └── young_adult_backup.csv 
+│       
 ├── src/
+│   ├── clients/
+│   │   ├── keys/
+│   │   │   ├── dummy_gemini.json
+│   │   │   └── gemini_key.json       
+│   │   │ 
+│   │   ├── gemini_client_base.py   
+│   │   ├── gemini_client_dummy.py     
+│   │   ├── gemini_client_real.py      
+│   │   └── gemini_loader.py       
+│   │
 │   ├── data_ingestion/
-│   │   └── spotify_extract.py          # Pulls Spotify data via API
+│   │   └── spotify_extract_v2.py       # Pulls Spotify data via API
 │   │
 │   ├── processing/
 │   │   ├── generate_playlist_mood.py      
@@ -71,10 +89,8 @@ FINAL/
 │   │
 │   └── main.py                   # CLI entry point
 │
-├── tests/
-│   ├── test_genre_mapping.py
-│   ├── test_reading_time.py
-│   └── test_playlist_generator.py
+├── dummy_csv_generation.py
+├── dummy_csv_prompting.py
 │
 ├── .gitignore
 ├── README.md

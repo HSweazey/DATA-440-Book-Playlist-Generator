@@ -16,15 +16,13 @@ Duration: 4 weeks
 
 **Produce:** A playlist of songs whose total duration approximates the estimated time remaining to finish the book. Songs matched by genre, mood, or theme to the book.
 
-## 3. Inputs and Outputs 
+## 3. User Inputs 
 
 | Input           | Type            | Description                                                                               |
 | --------------- | --------------- | ----------------------------------------------------------------------------------------- |
 | `book_title`    | `str`           | Title of the book the user is reading                                                     |
 | `book_author`    | `str`          | Author of the book the user is reading                                                     |
-| `total_page_number`  | `int`, optional | Total number of pages in book; default is ?                                                        |
-| `book_data.csv` | `CSV`           | Pre-downloaded dataset of books (title, author, genre, page count, description)<br>(fallback in case user does not have Gemini API key working) |
-| `spotify.csv`   | `CSV`           | Cached dataset of Spotify track metadata (title, artist, genre, duration, popularity)<br>(fallback in case user does not have Spotify or Spotify API dummy key not working)     |
+| `total_page_number`  | `int`, optional | Total number of pages in book; default is 300                                                       |
 
 
 ## 4. Success Criteria (Validation) (?)
@@ -75,9 +73,11 @@ FINAL/
 │   │   └── spotify_extract_v2.py       # Pulls Spotify data via API
 │   │
 │   ├── processing/
-│   │   ├── generate_playlist_mood.py      
-│   │   ├── generate_playlist_input.py  # Generates keywords from Gemini as input for the playlist generator     
-│   │   └── playlist_generator.py       # Builds playlist matching duration & genre
+│   │   ├── csv_playlist_generation.py      
+│   │   ├── WIP_generate_playlist_csv.py      
+
+│   │   ├── generate_playlist_input_v5.py  # Generates keywords from Gemini as input for the playlist generator     
+│   │   └── generate_playlist_fixed_g.py       # Builds playlist matching duration & genre
 │   │
 │   ├── visualization/
 │   │   └── playlist_plot.py      # Optional visualization tools (WIP)

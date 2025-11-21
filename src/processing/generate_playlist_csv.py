@@ -1,4 +1,4 @@
-#python3.12 -m src.processing.generate_playlist_fixed_g 
+#python3.12 -m src.processing.WIP_generate_playlist_csv 
 
 import math
 import ast
@@ -8,21 +8,34 @@ import json
 import pandas as pd
 import sys 
 
-from src.processing.generate_playlist_input_v5 import generate_playlist_input
+from processing.generate_playlist_input import generate_playlist_input
 import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
-from src.utils.KEYS import CLIENT_ID, CLIENT_SECRET  # <- ensure utils has __init__.py
+#from spotipy.oauth2 import SpotifyClientCredentials
+#from src.utils.KEYS import CLIENT_ID, CLIENT_SECRET  # <- ensure utils has __init__.py
 
 # -------------------------------------------------------
 # SPOTIFY SETUP
 # -------------------------------------------------------
+spotify_available = True
 try:
-    auth_manager = SpotifyClientCredentials(client_id = CLIENT_ID, client_secret = CLIENT_SECRET)
-    sp = spotipy.Spotify(auth_manager=auth_manager)
-    sp.search(q="test", type="track", limit=1)
-except Exception as e:
-    print(f"Error: Failed to initialize Spotify API connection. Error: {e}")
-    sys.exit(1)
+    from src.utils.KEYS import CLIENT_ID, CLIENT_SECRET
+    import spotipy
+    from spotipy.oauth2 import SpotifyClientCredentials
+
+    try:
+        auth_manager = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
+        sp = spotipy.Spotify(auth_manager=auth_manager)
+        sp.search(q="test", type="track", limit=1)
+    except Exception as e:
+        print(f"⚠️ Spotify connection failed. Using backup playlist only. Error: {e}")
+        spotify_available = False
+
+except ImportError as e:
+    print(f"⚠️ Spotify keys not found. Using backup playlist only. Error: {e}")
+    spotify_available = False
+
+if not spotify_available:
+    from processing.csv_backup_generation import generate_backup_playlist
 
 
 # Average song length in minutes
@@ -335,6 +348,12 @@ def generate_playlist():
     """
     Generate a Spotify playlist based on book parameters from Gemini.
     """
+
+    if not spotify_available:
+        # Skip all Gemini / Spotify logic and go straight to backup
+        total_pages = int(input("Enter total number of pages (optional, press enter if unknown): ") or 250)
+        tracks = generate_backup_playlist(total_pages=total_pages)
+        return
 
     # Step 1: Get Gemini keywords and page info
     data = generate_playlist_input()

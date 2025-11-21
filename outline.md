@@ -40,6 +40,9 @@ Duration: 4 weeks
 
 FINAL/
 │
+├── playlist storage/  
+│   ├── # all playlists generated during testing  
+│
 ├── data/                           # Data and cache directory
 │   ├── biography_backup.csv 
 │   ├── classics_backup.csv 
@@ -70,17 +73,16 @@ FINAL/
 │   │   └── gemini_loader.py       
 │   │
 │   ├── data_ingestion/
+│   │   ├── dummy_csv_generation.py   
+│   │   ├── dummy_csv_prompting.py   
 │   │   └── spotify_extract_v2.py       # Pulls Spotify data via API
 │   │
 │   ├── processing/
-│   │   ├── csv_playlist_generation.py      
-│   │   ├── WIP_generate_playlist_csv.py      
-
-│   │   ├── generate_playlist_input_v5.py  # Generates keywords from Gemini as input for the playlist generator     
-│   │   └── generate_playlist_fixed_g.py       # Builds playlist matching duration & genre
-│   │
-│   ├── visualization/
-│   │   └── playlist_plot.py      # Optional visualization tools (WIP)
+│   │   ├── csv_backup_generation.py    # Generates playlist from csv based on genre   
+│   │   ├── generate_playlist_input.py  # Generates keywords from Gemini as input for the playlist generator   
+│   │   ├── generate_playlist.py        # Builds playlist matching duration & genre
+│   │   └── recycling_bin 
+│   │       └──  # all outdated / irrelevant files 
 │   │
 │   ├── utils/
 │   │   ├── KEYS.py               # Key storage 
@@ -88,9 +90,6 @@ FINAL/
 │   │   └── config.py             # API keys, constants, directories
 │   │
 │   └── main.py                   # CLI entry point
-│
-├── dummy_csv_generation.py
-├── dummy_csv_prompting.py
 │
 ├── .gitignore
 ├── README.md

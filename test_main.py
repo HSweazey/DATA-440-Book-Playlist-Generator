@@ -1,4 +1,4 @@
-from src.processing.generate_playlist_fixed_g import *
+from src.processing.generate_playlist_csv import *
 import pandas as pd
 import os
 

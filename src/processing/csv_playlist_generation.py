@@ -91,7 +91,6 @@ def generate_backup_playlist(total_pages: int = 250):
     print("  g = graphic novels")
     print("  hf = historical fiction")
     print("  h = horror")
-    print("  i = instrumental (default)")
     print("  lf = literary fiction")
     print("  m = mystery")
     print("  r = romance")

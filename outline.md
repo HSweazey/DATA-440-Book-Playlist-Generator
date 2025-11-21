@@ -41,7 +41,7 @@ Duration: 4 weeks
 FINAL/
 │
 ├── playlist storage/  
-│   ├── # all playlists generated during testing  
+│   └── # all playlists generated during testing  
 │
 ├── data/                           # Data and cache directory
 │   ├── biography_backup.csv 

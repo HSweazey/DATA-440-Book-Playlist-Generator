@@ -2,7 +2,7 @@ import math
 import ast
 import time
 import pandas as pd
-from dummy_csv_prompting import generate_genre_keywords
+from data_ingestion.dummy_csv_prompting import generate_genre_keywords
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from src.utils.KEYS import CLIENT_ID, CLIENT_SECRET

@@ -17,6 +17,7 @@ A book title, author, and (optionally) the total number of pages
 A playlist whose total runtime closely matches the estimated time remaining to finish the book.
 Songs are selected based on genre, mood, or keywords derived from Gemini.
 
+---
 
 # Quickstart Guide
 

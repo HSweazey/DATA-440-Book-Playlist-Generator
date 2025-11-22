@@ -77,30 +77,25 @@ uv run src/main.py
 
 # 📀 How does it work? 
 
-1. **User inputs:**
+#### 1. User Inputs
 - Book title
 - Author
 - Optional total page count 
 
+#### 2. Gemini generates thematic keywords based on the book.
 
-2. **Gemini generates thematic keywords based on the book.**
-
-
-3. **If Spotify API keys are available:**
+#### 3. If Spotify API keys are available:
 - The system fetches real track data matching those themes.
 
-
-4. **If not:**
+#### 4. If not:
 - It automatically falls back to genre-based CSV backups containing pre-collected Spotify songs.
 
-
-3. **Playlist generation logic:**
+#### 5. Playlist generation logic:
 - Maps book → genre
 - Estimates reading time
 - Assembles tracks whose total duration is within ±10% of the target
 
-
-6. **Output:**
+#### 6. Output:
 - A genre-aligned playlist printed to console and optionally saved to /playlist storage/.
 
 

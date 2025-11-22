@@ -97,9 +97,26 @@ FINAL/
 └── uv.lock
 ```
 
+## 6. Error Handling Pipeline 
+
+```python
+
+USER STARTS HERE: generate_playlist.py 
+│
+└──> DO CLIENT_ID AND CLIENT_SECRET EXIST AND CAN THEY BE IMPORTED #?
+     │
+     ├──> IF NO: # playlist generated using generate_playlist_csv.py and backup CSVs 
+     │
+     └──> IF YES: DOES gemini_key.json/api_key EXIST AND DOES IT WORK #?
+          │
+          ├──> IF NO: # playlist input generated using dummy_gemini.json and Spotify API 
+          │
+          └──> IF YES: # playlist generated using generate_playlist.py as normal 
+
+```
 
 
-## 6. Implementation Plan 
+## 7. Implementation Plan 
 
 | Week                                 | Focus                   | Tasks                                                                                                                                                                                                  | Owner                                                        |
 | ------------------------------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
@@ -110,7 +127,6 @@ FINAL/
 
 
 
-## 7. Optional Extensions 
+## 8. Optional Extensions 
 - aesthetically pleasing user interface with extra time
-- explore export direct to spotify playlist if possible 
 - option to export to youtube playlist if no spotify account 

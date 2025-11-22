@@ -1,4 +1,4 @@
-# Project Overview
+# 📚🎧 Project Overview 🎧📚
 
 The Book Playlist Generator automatically creates a music playlist that matches the genre and remaining reading time of a book.
 The system combines:
@@ -8,7 +8,7 @@ The system combines:
 
 This tool is designed so that users can input a book, and the system will output a curated, thematically coherent playlist.
 
-## Project Goal
+## 🎯 Project Goal 
 
 **Given:**
 A book title, author, and (optionally) the total number of pages
@@ -19,7 +19,7 @@ Songs are selected based on genre, mood, or keywords derived from Gemini.
 
 ---
 
-# Quickstart Guide
+# 🚀🔑 Quickstart Guide 🔑🚀
 
 ### 1. Clone the Repository 
 ```python
@@ -33,6 +33,7 @@ cd FINAL
 
 ### 3. Insert Your API Keys 
 **Spotify API Keys**
+
 Open: 
 ```python
 src/utils/KEYS.py
@@ -44,6 +45,7 @@ CLIENT_SECRET = "<your-spotify-client-secret>"
 ```
 
 **Gemini API Key**
+
 Open: 
 ```python
 src/clients/keys/gemini_key.json
@@ -73,33 +75,38 @@ uv run src/main.py
 
 ---
 
-# How it Works 
+# 📀 How does it work? 
 
-1. User inputs:
+1. **User inputs:**
 - Book title
 - Author
 - Optional total page count 
 
-2. Gemini generates thematic keywords based on the book.
 
-3. If Spotify API keys are available:
+2. **Gemini generates thematic keywords based on the book.**
+
+
+3. **If Spotify API keys are available:**
 - The system fetches real track data matching those themes.
 
-4. If not:
+
+4. **If not:**
 - It automatically falls back to genre-based CSV backups containing pre-collected Spotify songs.
 
-5. Playlist generation logic:
+
+3. **Playlist generation logic:**
 - Maps book → genre
 - Estimates reading time
 - Assembles tracks whose total duration is within ±10% of the target
 
-6. Output:
+
+6. **Output:**
 - A genre-aligned playlist printed to console and optionally saved to /playlist storage/.
 
 
 ---
 
-## System Architecture
+## ⬇️ System Architecture 
 
 ```python
 FINAL/
@@ -165,7 +172,7 @@ FINAL/
 
 ```
 
-## Error Handling Pipeline 
+## ⬇️ Error Handling Pipeline 
 
 ```python
 

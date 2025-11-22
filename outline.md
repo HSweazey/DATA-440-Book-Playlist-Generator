@@ -78,10 +78,14 @@ FINAL/
 │   │   └── spotify_extract_v2.py       # Pulls Spotify data via API
 │   │
 │   ├── processing/
+│   │   ├── csv_backup_generation_app.py   
 │   │   ├── csv_backup_generation.py    # Generates playlist from csv based on genre   
+│   │   ├── generate_playlist_csv_app.py 
+│   │   ├── generate_playlist_csv.py 
+│   │   ├── generate_playlist_input_app.py      
 │   │   ├── generate_playlist_input.py  # Generates keywords from Gemini as input for the playlist generator   
-│   │   ├── generate_playlist.py        # Builds playlist matching duration & genre
-│   │   └── recycling_bin 
+│   │   ├── holder.py
+│   │   └── recycling_bin/ 
 │   │       └──  # all outdated / irrelevant files 
 │   │
 │   ├── utils/
@@ -90,6 +94,12 @@ FINAL/
 │   │   └── config.py             # API keys, constants, directories
 │   │
 │   └── main.py                   # CLI entry point
+│
+├── app.py
+│
+├── test_main.py
+│
+├── outline.md 
 │
 ├── .gitignore
 ├── README.md

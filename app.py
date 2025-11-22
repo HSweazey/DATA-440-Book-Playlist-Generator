@@ -2,13 +2,14 @@ import streamlit as st
 import pandas as pd
 import re
 import time
+import json
 
 # CORRECT IMPORT: Pointing to the CSV_APP file which contains 'get_final_tracks'
 from src.processing.generate_playlist_csv_app import get_final_tracks 
 
 # --- UI CONFIGURATION ---
 st.set_page_config(
-    page_title="🎧 Cozy Reads Playlist Generator", 
+    page_title="🎧 Reading Playlist Generator", 
     layout="centered",
     initial_sidebar_state="collapsed"
 )
@@ -48,6 +49,18 @@ h1, h2, h3 { color: #f7b731; }
 st.markdown(custom_css, unsafe_allow_html=True)
 
 # --- LOGIC WRAPPERS ---
+def convert_to_csv(tracks: list) -> str:
+    """Converts the list of track dictionaries to a CSV string."""
+    if not tracks:
+        return ""
+    # Ensure all required columns are present for the DataFrame
+    df = pd.DataFrame(tracks)
+    return df.to_csv(index=False).encode('utf-8')
+
+def convert_to_json(tracks: list) -> str:
+    """Converts the list of track dictionaries to a JSON string."""
+    return json.dumps(tracks, indent=4) # Use json.dumps for clean formatting
+
 def extract_spotify_track_id(spotify_url: str) -> str | None:
     match = re.search(r'track/([^?]+)', spotify_url)
     if match: return match.group(1)
@@ -58,7 +71,7 @@ def display_embedded_tracks(tracks: list):
         st.warning("No tracks were generated. Please check the logs or try a different book.")
         return
 
-    st.subheader(f"🎶 Your Cozy Reading Playlist ({len(tracks)} Tracks)")
+    st.subheader(f"🎶 Your Reading Playlist ({len(tracks)} Tracks)")
     st.markdown("---")
     cols = st.columns(2)
     
@@ -88,8 +101,46 @@ def generate_playlist_ui_wrapper(book_title, author_name, page_count):
             st.error(f"❌ Error: {e}")
             return []
 
+def display_export_buttons(tracks: list, book_title: str):
+    if not tracks:
+        return
+
+    # Sanitize book title for filename (using your existing logic from generate_playlist_csv.py)
+    safe_title = re.sub(r'[^\w\-_\. ]', '', book_title.lower().replace(' ', '_'))
+    
+    # 1. Prepare CSV data
+    csv_data = convert_to_csv(tracks)
+    csv_filename = f"{safe_title}_playlist.csv"
+
+    # 2. Prepare JSON data
+    json_data = convert_to_json(tracks)
+    json_filename = f"{safe_title}_playlist.json"
+
+    st.subheader("⬇️ Export Playlist")
+    
+    # Use columns to place buttons side-by-side
+    col_csv, col_json = st.columns(2)
+    
+    with col_csv:
+        st.download_button(
+            label="Download as CSV",
+            data=csv_data,
+            file_name=csv_filename,
+            mime="text/csv",
+            type="primary" # Uses the custom primary color
+        )
+    
+    with col_json:
+        st.download_button(
+            label="Download as JSON",
+            data=json_data,
+            file_name=json_filename,
+            mime="application/json",
+            type="secondary" # Uses the default secondary color
+        )
+
 # --- MAIN LAYOUT ---
-st.title("📚 Cozy Reads Soundtrack Creator")
+st.title("📚 Reading Playlist Creator")
 st.markdown("A personalized reading playlist powered by AI and Spotify.")
 
 with st.form("playlist_input_form"):
@@ -97,7 +148,7 @@ with st.form("playlist_input_form"):
     book_title = st.text_input("Book Title", placeholder="e.g., 'The Midnight Library'")
     author_name = st.text_input("Author Name", placeholder="e.g., Matt Haig")
     page_count = st.number_input("Total Page Count", min_value=1, value=300)
-    submitted = st.form_submit_button("Generate My Cozy Playlist ✨")
+    submitted = st.form_submit_button("Generate My Custom Playlist ✨")
 
 if submitted:
     if book_title and author_name and page_count > 0:
@@ -159,7 +210,11 @@ if submitted:
             
             st.subheader("Raw Gemini CLI Output")
             st.code(st.session_state['debug_info'].get('gemini_raw', 'N/A'))
-
+            
+        # --- NEW CALL: Display Export Buttons ---
+        display_export_buttons(final_tracks, book_title)
+        st.markdown("---")
+        # ----------------------------------------
 
         # --- REST OF YOUR DISPLAY LOGIC ---
         display_embedded_tracks(final_tracks)

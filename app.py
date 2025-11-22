@@ -2,191 +2,167 @@ import streamlit as st
 import pandas as pd
 import re
 import time
-from src.processing.generate_playlist_csv_app import get_final_tracks # Assuming this is the correct path
 
-# --- 0. UI CUSTOMIZATION: Dark Mode & Cozy Aesthetic ---
-# We are changing the Streamlit base theme to 'dark' and then 
-# using custom CSS to refine the colors for a lo-fi/cozy look.
+# CORRECT IMPORT: Pointing to the CSV_APP file which contains 'get_final_tracks'
+from src.processing.generate_playlist_csv_app import get_final_tracks 
 
+# --- UI CONFIGURATION ---
 st.set_page_config(
     page_title="🎧 Cozy Reads Playlist Generator", 
     layout="centered",
     initial_sidebar_state="collapsed"
-    # Set Streamlit's built-in theme to 'dark' for the best base
-    # NOTE: This setting is typically best done in a .streamlit/config.toml file, 
-    # but we force the style here for immediate change.
 )
+
+# In app.py (near the top)
+if 'debug_info' not in st.session_state:
+    st.session_state['debug_info'] = {}
 
 custom_css = """
 <style>
-/* 1. Base Dark Mode Background & Text */
 [data-testid="stAppViewContainer"] {
-    background-color: #1a1a2e; /* Deep dark purple/blue */
-    color: #e0e0e0; /* Light gray for main text */
+    background-color: #1a1a2e; 
+    color: #e0e0e0; 
 }
-
-/* 2. Primary Color (Soft Warm Gold/Cream for accents) */
 .stButton>button {
-    background-color: #f7b731; /* Soft Gold/Amber */
-    color: #1a1a2e; /* Dark text on button for contrast */
+    background-color: #f7b731; 
+    color: #1a1a2e; 
     border-radius: 12px;
     border: 1px solid #d39c28;
-    transition: all 0.2s ease-in-out;
     font-weight: bold;
 }
-.stButton>button:hover {
-    background-color: #ffc84d; 
-    border: 1px solid #ffc84d;
-}
-
-/* 3. Input Field Styling */
 .stTextInput>div>div>input, .stNumberInput>div>div>input {
-    background-color: #2c2c44; /* Slightly lighter dark background for input boxes */
+    background-color: #2c2c44; 
     color: #f0f0f0;
     border-radius: 8px;
     border: 1px solid #4a4a6e;
-    padding: 10px;
 }
-
-/* 4. Rounded Containers (Input Form) */
 [data-testid="stForm"] {
-    background-color: #202035; /* Dark container background */
+    background-color: #202035; 
     border-radius: 15px; 
     padding: 20px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Stronger shadow for depth */
-    border: 1px solid #3a3a50;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); 
 }
-
-/* 5. Header Styling */
-h1, h2, h3 {
-    color: #f7b731; /* Use the soft gold for headings */
-}
-
-/* 6. Info/Success Boxes (Better contrast) */
-.stAlert {
-    background-color: #35354e !important;
-    border-radius: 8px;
-}
+h1, h2, h3 { color: #f7b731; }
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
-# You may need to also set the Streamlit configuration file (.streamlit/config.toml) 
-# to achieve the full dark mode effect perfectly across all elements.
 
-# ----------------------------------------------------------------------------------
-# --- 1. CORE LOGIC WRAPPER (Integration with your refactored code) ---
-# ----------------------------------------------------------------------------------
-
+# --- LOGIC WRAPPERS ---
 def extract_spotify_track_id(spotify_url: str) -> str | None:
-    """Extracts the Track ID from a full Spotify track URL."""
     match = re.search(r'track/([^?]+)', spotify_url)
-    if match:
-        return match.group(1)
+    if match: return match.group(1)
     return None
 
 def display_embedded_tracks(tracks: list):
-    """Renders the list of tracks as embedded Spotify tiles."""
     if not tracks:
-        st.warning("No tracks were generated for the playlist. Please check the logs.")
+        st.warning("No tracks were generated. Please check the logs or try a different book.")
         return
 
     st.subheader(f"🎶 Your Cozy Reading Playlist ({len(tracks)} Tracks)")
     st.markdown("---")
-    
-    # Use st.columns for a multi-tile display (e.g., 2 tiles wide)
     cols = st.columns(2)
     
     for i, track in enumerate(tracks):
         track_id = extract_spotify_track_id(track.get('spotify_url', ''))
         
         if track_id:
-            # Spotify Embed URL structure (uses placeholder 4 from previous instructions)
-            embed_url = f"https://open.spotify.com/embed/track/{track_id}"
+            # --- CORRECTED LINE ---
+            embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator"
             
             embed_html = f"""
-            <iframe 
-                src="{embed_url}" 
-                width="100%" 
-                height="100" 
-                frameborder="0" 
-                allowtransparency="true" 
-                allow="encrypted-media"
-                style="border-radius: 10px;"
-            ></iframe>
+            <iframe src="{embed_url}" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
             """
-            
-            # Display the tile in a column
-            with cols[i % 2]: # Cycle between column 0 and 1
-                st.components.v1.html(embed_html, height=110)
+            with cols[i % 2]: 
+                st.components.v1.html(embed_html, height=100)
         else:
-            # Fallback for tracks without a valid ID
+            # Fallback for tracks with missing IDs/URLs
             with cols[i % 2]:
-                 st.markdown(f"**{track.get('track_name', 'Unknown Track')}** - {track.get('artist_name', 'Unknown Artist')} (URL error)")
-
+                 st.markdown(f"**{track.get('track_name', 'Unknown Track')}** by {track.get('artist_name', 'Unknown Artist')} (URL error)")
 
 def generate_playlist_ui_wrapper(book_title, author_name, page_count):
-    """
-    Connects Streamlit inputs to your backend logic.
-    """
-    
-    # Display loading message in the UI
-    with st.spinner(f"Generating Playlist..."):
+    with st.spinner(f"Generating playlist..."):
         try:
-            # CALL TO YOUR REFRACTORED CODE
             final_tracks = get_final_tracks(book_title, author_name, page_count)
-            
             return final_tracks
-            
         except Exception as e:
-            # We catch the error and display it directly in the UI for clarity
-            st.error(f"❌ An error occurred during generation: {e}")
-            st.warning("Please check your Spotify credentials, API keys, and network connection.")
-            return [] 
+            st.error(f"❌ Error: {e}")
+            return []
 
-# ----------------------------------------------------------------------------------
-# --- 2. MAIN STREAMLIT LAYOUT ---
-# ----------------------------------------------------------------------------------
-
+# --- MAIN LAYOUT ---
 st.title("📚 Cozy Reads Soundtrack Creator")
 st.markdown("A personalized reading playlist powered by AI and Spotify.")
 
-# Input Form: Use st.form for the clean, contained, rounded box
 with st.form("playlist_input_form"):
     st.subheader("Book Details")
-    
-    # Input for Book Title
-    book_title = st.text_input(
-        "Book Title", 
-        placeholder="e.g., 'The Midnight Library'",
-    )
-    
-    # Input for Author Name
-    author_name = st.text_input(
-        "Author Name", 
-        placeholder="e.g., Matt Haig",
-    )
-    
-    # Input for Page Count (Your clarified third input)
-    page_count = st.number_input(
-        "Total Page Count", 
-        min_value=1, 
-        max_value=5000, 
-        value=300, 
-        help="Used to estimate the required playlist length (approx. 2 min/page)."
-    )
-    
-    # Generate Button
+    book_title = st.text_input("Book Title", placeholder="e.g., 'The Midnight Library'")
+    author_name = st.text_input("Author Name", placeholder="e.g., Matt Haig")
+    page_count = st.number_input("Total Page Count", min_value=1, value=300)
     submitted = st.form_submit_button("Generate My Cozy Playlist ✨")
 
-# Output Section
 if submitted:
     if book_title and author_name and page_count > 0:
         
-        # 1. Call the wrapper function to generate the playlist
+        # Ensure session state is initialized before running the function
+        if 'debug_info' not in st.session_state:
+            st.session_state['debug_info'] = {}
+
         final_tracks = generate_playlist_ui_wrapper(book_title, author_name, page_count)
+
+        # --- DEBUG DISPLAY 1: Toasts for quick alerts ---
+        if 'gemini_parsed' in st.session_state['debug_info']:
+            g_info = st.session_state['debug_info']['gemini_parsed']
+            
+            # --- FIX: Check if g_info is a dictionary before using .get() ---
+            if isinstance(g_info, dict):
+                st.toast(f"✅ Gemini Moods: {g_info.get('Mood Keywords', 'N/A')}", icon='🧠')
+            else:
+                # If it's not a dict, display the error string directly
+                st.toast(f"❌ Gemini Error: {g_info}", icon='⚠️')
+            # --- END FIX ---
+            
+        if 'spotify_query' in st.session_state['debug_info']:
+            s_info = st.session_state['debug_info']
+            st.toast(f"🎵 Spotify: Found {s_info.get('tracks_returned', 0)} tracks using '{s_info.get('successful_attempt', 'N/A')}'", icon='🎶')
         
-        # 2. Display the embedded tiles
+        # --- DEBUG DISPLAY 2: Detailed Expander ---
+        with st.expander("🛠️ Debug Information (Gemini & Spotify Queries)"):
+            # Retrieve data from session state
+            debug_info = st.session_state['debug_info']
+            target_metrics = debug_info.get('target_metrics', {})
+            
+            st.subheader("⏱️ Read Time & Target Metrics")
+            st.markdown(f"**Target Read Time**: **{target_metrics.get('target_read_time_min', 'N/A')} minutes**")
+            st.markdown(f"**Target Track Count**: **{target_metrics.get('num_tracks_target', 'N/A')}**")
+            # Retrieve the data
+            gemini_output = st.session_state['debug_info'].get('gemini_parsed', {'status': 'Error: Not available'}) # <-- Error is sourced here
+
+            st.subheader("Gemini Output")
+
+            # --- VULNERABLE CODE BLOCK (WHERE YOU NEED TO ADD THE FIX) ---
+            # It currently looks like:
+            # st.json(gemini_output) 
+            
+            # --- REPLACE WITH THE TYPE-CHECKED FIX ---
+            if isinstance(gemini_output, dict):
+                st.json(gemini_output)
+            elif isinstance(gemini_output, str):
+                st.error(f"Gemini Parsing Failure")
+                st.code(gemini_output) 
+            else:
+                st.code(str(gemini_output))
+            # -----------------------------------------------------------
+            
+            st.subheader("Spotify Search Summary")
+            st.markdown(f"**Successful Query**: `{st.session_state['debug_info'].get('spotify_query', 'N/A')}`")
+            st.markdown(f"**Tracks Returned**: **{st.session_state['debug_info'].get('tracks_returned', 0)}**")
+            st.markdown(f"**Attempt Used**: {st.session_state['debug_info'].get('successful_attempt', 'N/A')}")
+            
+            st.subheader("Raw Gemini CLI Output")
+            st.code(st.session_state['debug_info'].get('gemini_raw', 'N/A'))
+
+
+        # --- REST OF YOUR DISPLAY LOGIC ---
         display_embedded_tracks(final_tracks)
         
     else:
-        st.error("Please ensure the Book Title, Author Name, and Page Count are all entered.")
+        st.error("Please ensure all fields are filled.")

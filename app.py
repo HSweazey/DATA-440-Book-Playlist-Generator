@@ -68,29 +68,82 @@ def extract_spotify_track_id(spotify_url: str) -> str | None:
 
 def display_embedded_tracks(tracks: list):
     if not tracks:
-        st.warning("No tracks were generated. Please check the logs or try a different book.")
+        st.warning("No tracks were generated.")
         return
 
-    st.subheader(f"🎶 Your Reading Playlist ({len(tracks)} Tracks)")
+    # 1. Split the tracks into "Featured" (Embeds) and "Remaining" (List)
+    EMBED_LIMIT = 6 
+    featured_tracks = tracks[:EMBED_LIMIT]
+    remaining_tracks = tracks[EMBED_LIMIT:]
+
+    # ---------------------------------------------------------
+    # SECTION 1: PLAYLIST PREVIEW (Embedded Players)
+    # ---------------------------------------------------------
+    st.subheader(f"🎧 Playlist Preview (Top {len(featured_tracks)})")
     st.markdown("---")
-    cols = st.columns(2)
     
-    for i, track in enumerate(tracks):
+    cols_featured = st.columns(2)
+    
+    for i, track in enumerate(featured_tracks):
         track_id = extract_spotify_track_id(track.get('spotify_url', ''))
         
-        if track_id:
-            # --- CORRECTED LINE ---
-            embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator"
-            
-            embed_html = f"""
-            <iframe src="{embed_url}" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
-            """
-            with cols[i % 2]: 
+        with cols_featured[i % 2]:
+            if track_id:
+                embed_url = f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator"
+                embed_html = f"""
+                <iframe src="{embed_url}" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+                """
                 st.components.v1.html(embed_html, height=100)
-        else:
-            # Fallback for tracks with missing IDs/URLs
-            with cols[i % 2]:
-                 st.markdown(f"**{track.get('track_name', 'Unknown Track')}** by {track.get('artist_name', 'Unknown Artist')} (URL error)")
+            else:
+                st.error(f"Could not embed: {track.get('track_name')}")
+
+    # ---------------------------------------------------------
+    # SECTION 2: FULL TRACK LIST (Clickable Cards)
+    # ---------------------------------------------------------
+    if remaining_tracks:
+        st.markdown("<br>", unsafe_allow_html=True) # Add a little vertical spacer
+        st.subheader(f"📋 Full Track List ({len(remaining_tracks)} more)")
+        st.markdown("---")
+
+        cols_list = st.columns(2)
+        
+        for i, track in enumerate(remaining_tracks):
+            track_name = track.get('track_name', 'Unknown Title')
+            artist_name = track.get('artist_name', 'Unknown Artist')
+            spotify_url = track.get('spotify_url', '#')
+            
+            # Use HTML to make a clean, clickable card
+            card_html = f"""
+            <div style="
+                background-color: #2c2c44; 
+                padding: 12px; 
+                border-radius: 10px; 
+                margin-bottom: 12px; 
+                border: 1px solid #4a4a6e;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                transition: 0.3s;">
+                <div style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding-right: 10px;">
+                    <strong style="color: #f0f0f0;">{track_name}</strong><br>
+                    <span style="color: #bbb; font-size: 0.85em;">{artist_name}</span>
+                </div>
+                <a href="{spotify_url}" target="_blank" style="
+                    background-color: #f7b731;
+                    color: #1a1a2e;
+                    padding: 6px 12px;
+                    text-decoration: none;
+                    font-size: 0.8em;
+                    font-weight: bold;
+                    border-radius: 15px;
+                    white-space: nowrap;">
+                    Play ↗
+                </a>
+            </div>
+            """
+            
+            with cols_list[i % 2]:
+                st.markdown(card_html, unsafe_allow_html=True)
 
 def generate_playlist_ui_wrapper(book_title, author_name, page_count):
     with st.spinner(f"Generating playlist..."):
@@ -176,24 +229,23 @@ if submitted:
             st.toast(f"🎵 Spotify: Found {s_info.get('tracks_returned', 0)} tracks using '{s_info.get('successful_attempt', 'N/A')}'", icon='🎶')
         
         # --- DEBUG DISPLAY 2: Detailed Expander ---
-        with st.expander("🛠️ Debug Information (Gemini & Spotify Queries)"):
+        with st.expander("🛠️ Debug Information (Pipeline Metrics)"):
+            
             # Retrieve data from session state
-            debug_info = st.session_state['debug_info']
+            debug_info = st.session_state.get('debug_info', {})
             target_metrics = debug_info.get('target_metrics', {})
             
             st.subheader("⏱️ Read Time & Target Metrics")
-            st.markdown(f"**Target Read Time**: **{target_metrics.get('target_read_time_min', 'N/A')} minutes**")
-            st.markdown(f"**Target Track Count**: **{target_metrics.get('num_tracks_target', 'N/A')}**")
-            # Retrieve the data
-            gemini_output = st.session_state['debug_info'].get('gemini_parsed', {'status': 'Error: Not available'}) # <-- Error is sourced here
-
-            st.subheader("Gemini Output")
-
-            # --- VULNERABLE CODE BLOCK (WHERE YOU NEED TO ADD THE FIX) ---
-            # It currently looks like:
-            # st.json(gemini_output) 
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Target Read Time", f"{target_metrics.get('target_read_time_min', '0')} min")
+            with col2:
+                st.metric("Target Track Count", target_metrics.get('num_tracks_target', '0'))
             
-            # --- REPLACE WITH THE TYPE-CHECKED FIX ---
+            st.markdown("---")
+            st.subheader("🧠 Gemini Output")
+            gemini_output = debug_info.get('gemini_parsed', {'status': 'Error: Not available'})
+            
             if isinstance(gemini_output, dict):
                 st.json(gemini_output)
             elif isinstance(gemini_output, str):
@@ -201,15 +253,27 @@ if submitted:
                 st.code(gemini_output) 
             else:
                 st.code(str(gemini_output))
-            # -----------------------------------------------------------
+
+            st.markdown("---")
+            st.subheader("🎵 Track Generation Log")
             
-            st.subheader("Spotify Search Summary")
-            st.markdown(f"**Successful Query**: `{st.session_state['debug_info'].get('spotify_query', 'N/A')}`")
-            st.markdown(f"**Tracks Returned**: **{st.session_state['debug_info'].get('tracks_returned', 0)}**")
-            st.markdown(f"**Attempt Used**: {st.session_state['debug_info'].get('successful_attempt', 'N/A')}")
-            
-            st.subheader("Raw Gemini CLI Output")
-            st.code(st.session_state['debug_info'].get('gemini_raw', 'N/A'))
+            # --- NEW: DISPLAY THE GRANULAR LOG ---
+            search_log = debug_info.get('search_log', [])
+            if search_log:
+                st.dataframe(
+                    pd.DataFrame(search_log),
+                    use_container_width=True,
+                    hide_index=True,
+                    column_config={
+                        "Source": st.column_config.TextColumn("Source (Method: Keyword)"),
+                        "Tracks Added": st.column_config.NumberColumn("Tracks Found"),
+                        "Query": st.column_config.TextColumn("Spotify Query Used"),
+                    }
+                )
+            else:
+                st.info("No search logs available.")
+
+            st.caption(f"Final Playlist Length: {debug_info.get('post_adjustment_length', 0)} tracks")
             
         # --- NEW CALL: Display Export Buttons ---
         display_export_buttons(final_tracks, book_title)

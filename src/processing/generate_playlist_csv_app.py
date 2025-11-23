@@ -79,9 +79,9 @@ def validate_and_extract_parameters(gemini_response_str: str) -> dict | None:
     # --- KEYWORD SANITIZATION (CLASSROOM SAFE MODE) ---
     unsafe_map = {
         'romance': 'love', 'romantic': 'love',
-        'sexy': 'warm', 'sensual': 'tender',
+        'sexy': 'wemotional', 'sensual': 'emotional',
         'seductive': 'mysterious', 'passionate': 'emotional',
-        'steamy': 'intense', 'erotic': 'dark', 'intimate': 'close'
+        'steamy': 'intense', 'erotic': 'dark', 'intimate': 'emotional'
     }
     
     sanitized_keywords = []
@@ -103,7 +103,7 @@ def validate_and_extract_parameters(gemini_response_str: str) -> dict | None:
     return {'mood_keywords_string': mood_keywords_string, 'score_query': str(score_query).strip()}
 
 def _build_query(primary_keywords: str, query_type: str) -> str:
-    ANTI_VOCAL_KEYWORDS = "instrumental"
+    ANTI_VOCAL_KEYWORDS = "instrumental orchestral"
     if query_type == "full":
         genre = PRIMARY_GENRE_BASE
         keywords = f"{genre} {primary_keywords}"

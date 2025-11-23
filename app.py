@@ -262,7 +262,9 @@ if submitted:
             if search_log:
                 st.dataframe(
                     pd.DataFrame(search_log),
-                    use_container_width=True,
+                    # --- FIX: Updated parameter based on warning ---
+                    width='stretch',  # Replaces use_container_width=True
+                    # -----------------------------------------------
                     hide_index=True,
                     column_config={
                         "Source": st.column_config.TextColumn("Source (Method: Keyword)"),

@@ -12,23 +12,16 @@ def generate_playlist_input(book=None, author=None, total_pages=0, suppress_inpu
     if not book: raise ValueError("Book title is required for generation.")
 
     prompt = f"""
-    Act as a professional Music Supervisor curating a background instrumental playlist for a reading session of the book "{book}"{f" by {author}" if author else ""}.
+    Analyze the book "{book}"{f" by {author}" if author else ""}.
 
-    **TASK:**
-    1. Analyze the book's setting, emotional arc, and atmosphere.
-    2. Generate exactly 4 unique, single-word mood keywords.
-    3. Identify if a specific instrumental film score exists.
+    Your response must be a single Python dictionary with the following keys:
+    1. 'mood_keywords': A list of exactly five unique, lowercase, descriptive mood and style keywords that capture the story's tone and atmosphere. These keywords will be used to search for instrumental ambient music.
+    2. 'score_query': (OPTIONAL) If the book has a well-known movie or TV adaptation, include this key with the official name of the instrumental score or soundtrack album. If NO adaptation exists, omit this key entirely.
+    3. 'composer_name': (CONDITIONAL) If you include 'score_query', you **must** include this key with the primary composer's full name (e.g., 'Hans Zimmer', 'Max Richter'). Omit this key if 'score_query' is omitted.
 
-    - The keywords will be used to search for **Ambient** and **Instrumental** music only.
-
-    **OUTPUT FORMAT:**
-    Return ONLY a single-line Python dictionary with these keys:
-    - 'mood_keywords': A list of 4 lowercase strings.
-    - 'score_query': (Optional) The official title of the best instrumental movie/TV score adaptation. If none, omit this key.
-
-    **EXAMPLES:**
-    Input: Dune
-    Output: {{'mood_keywords': ['arid', 'prophetic', 'vast', 'mystical'], 'score_query': 'Dune Soundtrack 2021'}}
+    Respond **ONLY as a single-line Python dictionary** without any extra characters or words.
+    
+    Example (With Score): {{'mood_keywords': ['heroic', 'epic', 'grand', 'cinematic', 'intense'], 'score_query': 'Dune Soundtrack 2021', 'composer_name': 'Hans Zimmer'}}
     """
     
     # --- Client Loading ---

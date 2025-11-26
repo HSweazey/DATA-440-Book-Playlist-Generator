@@ -2,7 +2,7 @@ import math
 import ast
 import time
 import pandas as pd
-from data_ingestion.dummy_csv_prompting import generate_genre_keywords
+from dummy_csv_prompting import generate_genre_keywords
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from src.utils.KEYS import CLIENT_ID, CLIENT_SECRET
@@ -75,8 +75,29 @@ def _build_query(primary_genre: str, mood_keywords_string: str) -> str:
     ANTI_VOCAL_KEYWORDS = "instrumental"
     keywords = f"{primary_genre} {mood_keywords_string}"
     
-    #return f"{ANTI_VOCAL_KEYWORDS} {keywords}".strip() # <-- Put back in
-    return f"ambient instrumental lofi classical soundtrack score"  # <--- remove
+    unsafe_map = {
+        'romance': 'love', 'romantic': 'love',
+        'sexy': 'emotional', 'sensual': 'emotional',
+        'seductive': 'mysterious', 'passionate': 'emotional',
+        'steamy': 'intense', 'erotic': 'dark', 'intimate': 'emotional'
+    }
+    
+    sanitized_keywords = []
+    for k in keywords:
+        word = str(k).lower().strip()
+        replaced = False
+        for unsafe, safe in unsafe_map.items():
+            if unsafe in word:
+                clean_word = word.replace(unsafe, safe)
+                sanitized_keywords.append(clean_word)
+                replaced = True
+                break
+        if not replaced:
+            sanitized_keywords.append(word)
+    mood_keywords_string = " ".join(sanitized_keywords)
+
+    #return f"{ANTI_VOCAL_KEYWORDS} {mood_keywords_string}".strip() # <-- Put back in
+    return f"instrumental ambient dreamy emotional love"  # <--- remove
 
 
 def _run_batched_search(query: str, num_tracks: int, offset_start: int = 0):
@@ -151,8 +172,8 @@ def export_to_csv(tracks: list, target_genre: str, mood_keywords: str):
     # Define the output directory and filename
     output_dir = "./data" 
     safe_genre = target_genre.lower().replace(' ', '_')
-    #filename = f"{output_dir}/{safe_genre}_backup.csv" # <-- put back in
-    filename = f"{output_dir}/instrumental_backup.csv"
+    filename = f"{output_dir}/{safe_genre}_backup.csv" # <-- put back in
+    #filename = f"{output_dir}/instrumental_backup.csv"
 
     # --- Directory Check and Creation ---
     # The exist_ok=True argument prevents an error if the directory already exists.

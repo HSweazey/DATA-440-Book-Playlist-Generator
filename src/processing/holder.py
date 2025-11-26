@@ -9,3 +9,5 @@ prompt = f"""
     
     Example (With Score): {{'mood_keywords': ['heroic', 'epic', 'grand'], 'score_query': 'Dune Soundtrack 2021'}}
     """
+
+SAFETY_TRIGGER_KEYWORDS = ['romantic', 'romance', 'sexy', 'erotic', 'intimate', 'passion', 'love', 'passionate']

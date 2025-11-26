@@ -15,7 +15,7 @@ DATA_DIR = os.path.join(BASE_DIR, "data")
 # Fallback genre
 DEFAULT_GENRE = "instrumental"
 
-# Mapping between user input and CSV filenames
+# 1. Internal Map: Code -> Filename
 GENRE_MAP = {
     "b": "biography_backup.csv",
     "c": "classics_backup.csv",
@@ -32,7 +32,27 @@ GENRE_MAP = {
     "t": "textbook_backup.csv",
     "th": "thriller_backup.csv",
     "ya": "young_adult_backup.csv",
-    "o": "instrumental_backup.csv",  # 'other' falls back to instrumental
+    "o": "instrumental_backup.csv", 
+}
+
+# 2. UI Map: Readable Name -> Code (For the Dropdown)
+UI_GENRE_OPTIONS = {
+    "Instrumental / Other": "o",
+    "Biography": "b",
+    "Classics": "c",
+    "Contemporary Fiction": "cf",
+    "Dystopian": "d",
+    "Fantasy": "f",
+    "Graphic Novels": "g",
+    "Historical Fiction": "hf",
+    "Horror": "h",
+    "Literary Fiction": "lf",
+    "Mystery": "m",
+    "Romance": "r",
+    "Science Fiction": "s",
+    "Textbook / Non-Fiction": "t",
+    "Thriller": "th",
+    "Young Adult": "ya"
 }
 
 def compute_playlist_length(total_pages: int = 100, current_page: int = 0):
@@ -46,7 +66,6 @@ def compute_playlist_length(total_pages: int = 100, current_page: int = 0):
 def _safe_load_csv(filename: str) -> pd.DataFrame | None:
     path = os.path.join(DATA_DIR, filename)
     if not os.path.exists(path):
-        # Fallback: Try looking in current directory if data dir fails
         if os.path.exists(filename): return pd.read_csv(filename)
         print(f"⚠️ CSV not found: {path}")
         return None
@@ -66,22 +85,19 @@ def _pick_tracks(df: pd.DataFrame, num: int):
 
 def generate_backup_playlist(total_pages: int = 250, genre_code: str = 'o'):
     """
-    UI-Friendly Backup Generator (No Input)
+    UI-Friendly Backup Generator
     """
-    print("\n⚠️ Using BACKUP playlist generator.")
+    print(f"\n⚠️ Using BACKUP playlist generator for code: {genre_code}")
     
-    # 1. Get the correct filename (now includes the suffix)
     filename = GENRE_MAP.get(genre_code, GENRE_MAP["o"])
     df = _safe_load_csv(filename)
     
-    # 2. If the chosen genre is missing, ONLY FALLBACK TO INSTRUMENTAL ONCE
+    # Fallback to instrumental if specific CSV is broken
     if df is None or df.empty:
-        # Check if we already tried the instrumental backup; if so, abort to avoid loop/crash
         if filename != "instrumental_backup.csv": 
-            print("⚠️ Selected genre CSV is empty or missing. Falling back to instrumental.")
+            print("⚠️ Selected genre CSV is empty. Falling back to instrumental.")
             df = _safe_load_csv("instrumental_backup.csv")
         else:
-            # If we tried instrumental and it failed, df is still None/empty, return safely.
             pass 
 
     num_tracks = compute_playlist_length(total_pages=total_pages)

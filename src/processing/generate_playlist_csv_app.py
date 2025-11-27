@@ -47,7 +47,11 @@ DURATION_THRESHOLD_MS = 5 * 60 * 1000
 # --- HELPER FUNCTIONS ---
 def create_track_fingerprint(track: dict) -> str:
     title = track.get('name', 'Unknown').lower()
-    artist_name = track['artists'][0]['name'].lower() if 'artists' in track else track.get('artist_name', 'Unknown').lower()
+    # Handle simplified track objects (from album_tracks) vs full track objects
+    if 'artists' in track:
+        artist_name = track['artists'][0]['name'].lower()
+    else:
+        artist_name = track.get('artist_name', 'Unknown').lower()
     return f"{title} | {artist_name}"
 
 def compute_playlist_length(current_page: int = 0, total_pages: int = 100) -> tuple[int, float]:
@@ -86,6 +90,10 @@ def validate_and_extract_parameters(gemini_response_str: str) -> dict | None:
     score_query = params.get('score_query', '')
     composer_name = params.get('composer_name', '')
     
+    # Terminal Debug
+    if score_query:
+        print(f"DEBUG: Extracted Score: '{score_query}' | Composer: '{composer_name}'")
+    
     return {
         'mood_keywords_string': all_keywords_string, 
         'score_query': str(score_query).strip(),
@@ -95,9 +103,11 @@ def validate_and_extract_parameters(gemini_response_str: str) -> dict | None:
 
 def _build_query(primary_keywords: str, query_type: str, composer_name: str = '') -> str:
     if query_type == "score":
+        # For Album/Score search, less is often more.
         if composer_name:
-            return f'artist:"{composer_name}" {primary_keywords}'.strip()
+            return f'{primary_keywords} {composer_name}'.strip()
         return primary_keywords.strip()
+        
     elif query_type == "ambient_split":
         return f"ambient {primary_keywords} instrumental".strip()
     elif query_type == "instrumental_split":
@@ -123,7 +133,6 @@ def _run_batched_search(query: str, num_tracks: int, randomize_start: bool = Fal
             tracks_batch = results.get('tracks', {}).get('items', [])
             if not tracks_batch: break 
 
-            # NO FILTERING: Accept all tracks regardless of 'explicit' status
             all_tracks.extend(tracks_batch)
             
             tracks_to_fetch -= len(tracks_batch) 
@@ -137,11 +146,7 @@ def _run_batched_search(query: str, num_tracks: int, randomize_start: bool = Fal
 def _store_spotify_debug(count: int, query: str, attempt_type: str):
     if 'debug_info' not in st.session_state: st.session_state['debug_info'] = {}
     if 'search_log' not in st.session_state['debug_info']: st.session_state['debug_info']['search_log'] = []
-    
-    # Store in Session State
     st.session_state['debug_info']['search_log'].append({ "Source": attempt_type, "Query": query, "Tracks Added": count })
-    
-    # Also print to terminal for verification
     print(f"DEBUG LOG: {attempt_type} | Query: '{query}' | Tracks: {count}")
 
 def fetch_mood_tracks(mood_keywords_string: str, tracks_needed: int, existing_tracks: list):
@@ -189,7 +194,6 @@ def fetch_mood_tracks(mood_keywords_string: str, tracks_needed: int, existing_tr
             if added_b > 0:
                 _store_spotify_debug(added_b, query_b, f"Instrumental: {keyword}")
 
-    # Cleanup Fill
     if tracks_needed > 0:
         ambient_query = "ambient instrumental"
         limit = int(tracks_needed * 2) 
@@ -209,34 +213,59 @@ def fetch_mood_tracks(mood_keywords_string: str, tracks_needed: int, existing_tr
     return all_found_tracks, "Double Dip Completed"
 
 def fetch_score_tracks(score_query: str, num_tracks: int, composer_name: str = ''):
-    SAFE_MAX_SCORE = 10
-    num_to_fetch = min(num_tracks, SAFE_MAX_SCORE)
-    search_terms = _build_query(score_query, "score", composer_name) 
-    
-    def process_search(query_str):
-        try:
-            limit = 20 
-            results = sp.search(q=query_str, type="track", limit=limit)
-            raw_tracks = results.get('tracks', {}).get('items', [])
+    """
+    ALBUM-FIRST STRATEGY:
+    1. Check if an Album exists for this score/composer.
+    2. If YES: Pull tracks from that Album.
+    3. If NO: Return empty (so we default to Mood Search).
+    """
+    # Build a search query optimized for ALBUMS
+    search_terms = _build_query(score_query, "score", composer_name)
+    print(f"DEBUG: Checking for Album with query: '{search_terms}'")
+
+    try:
+        # 1. THE CHECK: Search for an Album
+        album_results = sp.search(q=search_terms, type='album', limit=1)
+        
+        if album_results and album_results['albums']['items']:
+            # ALBUM FOUND!
+            best_album = album_results['albums']['items'][0]
+            album_id = best_album['id']
+            album_name = best_album['name']
+            print(f"DEBUG: ✅ Score Found! Using Album: {album_name} ({album_id})")
             
-            # Simple list to hold results
+            # 2. PULL FROM SCORE
+            # Get tracks directly from this album
+            # limit=50 ensures we get most tracks from a standard score
+            album_tracks_resp = sp.album_tracks(album_id, limit=50)
+            raw_tracks = album_tracks_resp.get('items', [])
+            
+            # Filter/Limit to the budget
             valid_tracks = []
             for track in raw_tracks:
-                # NO EXPLICIT FILTER
+                # SKIP TRACKS WITH "feat." IN TITLE
+                t_name = track.get('name', '').lower()
+                if "feat." in t_name or "(feat" in t_name:
+                    continue
+
                 valid_tracks.append(track)
-                if len(valid_tracks) >= num_to_fetch: break
-                
-            return valid_tracks
-        except Exception: return []
+                if len(valid_tracks) >= num_tracks: break
+            
+            if valid_tracks:
+                _store_spotify_debug(len(valid_tracks), f"Album: {album_name}", "Score (Album Match)")
+                return valid_tracks, f"Album: {album_name}"
+        
+        else:
+            # NO ALBUM FOUND
+            print(f"DEBUG: ❌ No Album found for '{search_terms}'. Skipping score search.")
+            # Return empty list -> logic will go right to Mood Search
+            return [], search_terms
 
-    final_selection = process_search(search_terms)
-    if not final_selection and composer_name:
-        fallback_query = _build_query(score_query, "score", composer_name='') 
-        final_selection = process_search(fallback_query)
-        if final_selection: search_terms = fallback_query + " (Fallback)"
-
-    if final_selection: _store_spotify_debug(len(final_selection), search_terms, "Score Search")
-    return final_selection, search_terms
+    except Exception as e:
+        print(f"DEBUG: Score search error: {e}")
+        return [], search_terms
+    
+    return [], search_terms
 
 def adjust_playlist_duration(tracks: list, target_time_min: float, mood_keywords_string: str) -> list:
     safe_tracks = [t for t in tracks if 'duration_ms' in t]
@@ -259,19 +288,14 @@ def adjust_playlist_duration(tracks: list, target_time_min: float, mood_keywords
         query = "ambient instrumental"
         raw_new_tracks, _ = _run_batched_search(query, num_to_add * 2, randomize_start=True) 
         track_fingerprints = set(create_track_fingerprint(t) for t in safe_tracks)
-        tracks_added = 0
         for track in raw_new_tracks:
             fingerprint = create_track_fingerprint(track)
             if fingerprint not in track_fingerprints:
                 safe_tracks.append(track)
                 track_fingerprints.add(fingerprint)
                 actual_time_ms += track['duration_ms']
-                tracks_added += 1
                 diff_min = (actual_time_ms - target_time_ms) / 60000
                 if abs(diff_min) <= 5: break
-        if tracks_added > 0:
-            _store_spotify_debug(tracks_added, query, "Duration Fill: Generic")
-
     return safe_tracks
 
 def get_final_tracks(book_title: str, author_name: str, total_pages: int):
@@ -333,6 +357,7 @@ def get_final_tracks(book_title: str, author_name: str, total_pages: int):
     track_fingerprints = set()
 
     if score_query and score_budget > 0:
+        # Runs the Album-First check strategy
         raw_score_tracks, query = fetch_score_tracks(score_query, score_budget, composer_name) 
         for track in raw_score_tracks:
             if len(final_tracks) >= score_budget: break
@@ -341,7 +366,10 @@ def get_final_tracks(book_title: str, author_name: str, total_pages: int):
                 final_tracks.append(track)
                 track_fingerprints.add(fingerprint)
 
+    # 5. MOOD SEARCH (Fills the rest)
+    # If Score Search returned 0 tracks, this budget automatically expands to cover the full target.
     tracks_needed_for_mood = num_tracks_target - len(final_tracks)
+    
     if tracks_needed_for_mood > 0:
         raw_mood_tracks, query = fetch_mood_tracks(mood_keywords_string, tracks_needed_for_mood, final_tracks)
         for track in raw_mood_tracks:

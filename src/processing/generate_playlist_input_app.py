@@ -16,7 +16,7 @@ def generate_playlist_input(book=None, author=None, total_pages=0, suppress_inpu
 
     Your response must be a single Python dictionary with the following keys:
     1. 'mood_keywords': A list of exactly five unique, lowercase, descriptive mood and style keywords that capture the story's tone and atmosphere. These keywords will be used to search for instrumental ambient music.
-    2. 'score_query': (OPTIONAL) If the book has a well-known movie or TV adaptation, include this key with the official name of the instrumental score or soundtrack album. If NO adaptation exists, omit this key entirely.
+    2. 'score_query': (OPTIONAL) If the book has a well-known movie or TV adaptation whose soundtrack is on Spotify, include this key with the official name of the instrumental score or soundtrack album. If NO adaptation soundtrack exists on Spotify, omit this key entirely.
     3. 'composer_name': (CONDITIONAL) If you include 'score_query', you **must** include this key with the primary composer's full name (e.g., 'Hans Zimmer', 'Max Richter'). Omit this key if 'score_query' is omitted.
 
     Respond **ONLY as a single-line Python dictionary** without any extra characters or words.
@@ -27,26 +27,26 @@ def generate_playlist_input(book=None, author=None, total_pages=0, suppress_inpu
     # --- Client Loading ---
     try:
         client = load_gemini_client() 
-        client.prompt = prompt # Set the prompt regardless of the attribute name
+        client.prompt = prompt 
     except Exception as e:
         st.error(f"❌ Gemini Load Error: Failed to instantiate client. Check dependencies. Details: {e}")
         return {}
 
-    # --- Debug Marker A ---
     st.toast("DEBUG: Attempting to send request to Gemini CLI...", icon='⚙️')
-    # --- End Debug Marker A ---
 
     # --- Send Request ---
     try:
-        # ... client setup ...
-        client.send_request() # <--- THIS LINE IS LIKELY THE BLOCKING POINT
+        try:
+            client.set_request(prompt)
+        except AttributeError:
+            client.prompt = prompt
+
+        client.send_request() 
     except Exception as e:
-        # ... error handling ...
+        st.error(f"❌ Gemini Subprocess Error: Failed to execute 'gemini' CLI tool. Details: {e}")
         return {}
 
-    # --- Debug Marker B ---
     st.toast("DEBUG: Successfully received response from Gemini CLI.", icon='✅')
-    # --- End Debug Marker B ---
 
     # --- Get Result ---
     try:
@@ -90,19 +90,19 @@ def generate_playlist_input(book=None, author=None, total_pages=0, suppress_inpu
         # Use literal_eval to safely parse the output dictionary
         parsed_dict = ast.literal_eval(text_output)
         
-        # Format the mood keywords for easy reading
         moods = parsed_dict.get('mood_keywords', 'N/A')
         score = parsed_dict.get('score_query', 'N/A')
+        composer = parsed_dict.get('composer_name', 'N/A') # <--- FIX: Extract Composer
         
         st.session_state['debug_info']['gemini_parsed'] = {
             "Mood Keywords": ", ".join(moods) if isinstance(moods, list) else moods,
-            "Score Query": score
+            "Score Query": score,
+            "Composer": composer # <--- FIX: Add to debug dictionary
         }
     except Exception:
         st.session_state['debug_info']['gemini_parsed'] = "Error: Failed to parse output into a dictionary."
     # --- END DEBUG CAPTURE ---
     
-    # ... (remaining return statement) ...
     return {
         "response": text_output,
         "book": book,

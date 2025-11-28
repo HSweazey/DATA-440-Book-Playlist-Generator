@@ -40,69 +40,68 @@ Duration: 4 weeks
 
 FINAL/
 │
-├── playlist storage/  
-│   └── # all playlists generated during testing  
+├── data/
+│   ├── biography_backup.csv
+│   ├── classics_backup.csv
+│   ├── contemporary_fiction_backup.csv
+│   ├── dystopian_backup.csv
+│   ├── fantasy_backup.csv
+│   ├── graphic_novels_backup.csv
+│   ├── historical_fiction_backup.csv
+│   ├── horror_backup.csv
+│   ├── instrumental_backup.csv
+│   ├── literary_fiction_backup.csv
+│   ├── mystery_backup.csv
+│   ├── romance_backup.csv
+│   ├── science_fiction_backup.csv
+│   ├── textbook_backup.csv
+│   ├── thriller_backup.csv
+│   └── young_adult_backup.csv
 │
-├── data/                           # Data and cache directory
-│   ├── biography_backup.csv 
-│   ├── classics_backup.csv 
-│   ├── contemporary_fiction_backup.csv 
-│   ├── dystopian_backup.csv 
-│   ├── fantasy_backup.csv 
-│   ├── graphic_novels_backup.csv 
-│   ├── historical_fiction_backup.csv 
-│   ├── horror_backup.csv 
-│   ├── instrumental_backup.csv 
-│   ├── literary_fiction_backup.csv 
-│   ├── mystery_backup.csv 
-│   ├── romance_backup.csv 
-│   ├── science_fiction_backup.csv 
-│   ├── textbook_backup.csv 
-│   ├── thriller_backup.csv 
-│   └── young_adult_backup.csv 
-│       
+├── playlist storage/
+│   └── # all playlists generated during testing 
+│
 ├── src/
 │   ├── clients/
 │   │   ├── keys/
 │   │   │   ├── dummy_gemini.json
-│   │   │   └── gemini_key.json       
-│   │   │ 
-│   │   ├── gemini_client_base.py   
-│   │   ├── gemini_client_dummy.py     
-│   │   ├── gemini_client_real.py      
-│   │   └── gemini_loader.py       
+│   │   │   ├── gemini_key.json
+│   │   │   └── spotify_client_info.py
+│   │   │   
+│   │   ├── gemini_client_base.py
+│   │   ├── gemini_client_dummy.py
+│   │   ├── gemini_client_real.py
+│   │   └── gemini_loader.py
 │   │
 │   ├── data_ingestion/
-│   │   ├── dummy_csv_generation.py   
-│   │   ├── dummy_csv_prompting.py   
-│   │   └── spotify_extract_v2.py       # Pulls Spotify data via API
+│   │   ├── dummy_csv_generation.py
+│   │   ├── dummy_csv_prompting.py
+│   │   └── spotify_extract_v2.py
 │   │
 │   ├── processing/
-│   │   ├── csv_backup_generation_app.py   
-│   │   ├── csv_backup_generation.py    # Generates playlist from csv based on genre   
-│   │   ├── generate_playlist_csv_app.py 
-│   │   ├── generate_playlist_csv.py 
-│   │   ├── generate_playlist_input_app.py      
-│   │   ├── generate_playlist_input.py  # Generates keywords from Gemini as input for the playlist generator   
-│   │   ├── holder.py
-│   │   └── recycling_bin/ 
-│   │       └──  # all outdated / irrelevant files 
+│   │   ├── csv_backup_generation_app.py
+│   │   ├── csv_backup_generation.py
+│   │   ├── generate_playlist_csv_app.py
+│   │   ├── generate_playlist_csv.py
+│   │   ├── generate_playlist_input_app.py
+│   │   ├── generate_playlist_input.py
+│   │   └──holder.py
+│   │
+│   ├── recycling_bin/
+│   │   └── # old functions kept for reference and documentation (disregard) 
 │   │
 │   ├── utils/
-│   │   ├── KEYS.py               # Key storage 
-│   │   ├── io_utils.py           # CSV/JSON read-write helpers
-│   │   └── config.py             # API keys, constants, directories
+│   │   ├── io_utils.py
+│   │   └── config.py
 │   │
-│   └── main.py                   # CLI entry point
+│   └── main.py
 │
 ├── app.py
-│
 ├── test_main.py
 │
-├── outline.md 
-│
-├── .gitignore
+├── outline.md
 ├── README.md
+│
 ├── pyproject.toml
 └── uv.lock
 ```
@@ -133,7 +132,7 @@ USER STARTS HERE: generate_playlist.py
 | **Week 1: Data Acquisition** | Setup & ingestion       |<br>- Implement `spotify_api.py`<br>- Implement `books_api.py` (Goodreads or LoC) | Dev A: Spotify<br>Dev B: Books  
 | **Week 2: Setup** | Setup & ingestion       | - Configure repo and UV environment<br>- Create `config.py` and `KEYS.py`<br>- Validate data schemas<br>- Draft `playlist_generator.py` and helper functions to select songs  | Dev A: UV and main function <br>Dev B: Config and helpers                                |
 | **Week 3: Core Logic & Mapping**     | Processing pipeline     | - Finetune `playlist_generator.py` (keyword/genre based)<br>- Validate success criteria<br>- Implement dummy APIs for Spotify and Gemini access by users                           | Dev A: Finetuning main function <br>Dev B: Dummy APIs and export logic |
-| **Week 4: Integration & Validation** | Orchestration & testing | - Build `main.py` CLI<br>- Add optional user interface<br>- Document in README + Quickstart                         | Both (pair review)                                           |
+| **Week 4: Integration & Validation** | Orchestration & testing | - Build `main.py` CLI<br>- Add user interface<br>- Document in README + Quickstart                         | Both (pair review)                                           |
 
 
 

@@ -36,7 +36,7 @@ cd FINAL
 
 Open: 
 ```python
-src/utils/KEYS.py
+src/clients/keys/spotify_client_info.py
 ```
 Replace Placeholders: 
 ```python
@@ -106,8 +106,6 @@ uv run src/main.py
 ```python
 FINAL/
 │
-├── playlist storage/
-│
 ├── data/
 │   ├── biography_backup.csv
 │   ├── classics_backup.csv
@@ -126,11 +124,16 @@ FINAL/
 │   ├── thriller_backup.csv
 │   └── young_adult_backup.csv
 │
+├── playlist storage/
+│   └── # all playlists generated during testing 
+│
 ├── src/
 │   ├── clients/
 │   │   ├── keys/
 │   │   │   ├── dummy_gemini.json
-│   │   │   └── gemini_key.json
+│   │   │   ├── gemini_key.json
+│   │   │   └── spotify_client_info.py
+│   │   │   
 │   │   ├── gemini_client_base.py
 │   │   ├── gemini_client_dummy.py
 │   │   ├── gemini_client_real.py
@@ -148,11 +151,12 @@ FINAL/
 │   │   ├── generate_playlist_csv.py
 │   │   ├── generate_playlist_input_app.py
 │   │   ├── generate_playlist_input.py
-│   │   ├── holder.py
-│   │   └── recycling_bin/
+│   │   └──holder.py
+│   │
+│   ├── recycling_bin/
+│   │   └── # old functions kept for reference and documentation (disregard) 
 │   │
 │   ├── utils/
-│   │   ├── KEYS.py
 │   │   ├── io_utils.py
 │   │   └── config.py
 │   │
@@ -160,8 +164,10 @@ FINAL/
 │
 ├── app.py
 ├── test_main.py
+│
 ├── outline.md
 ├── README.md
+│
 ├── pyproject.toml
 └── uv.lock
 

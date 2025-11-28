@@ -1,10 +1,7 @@
 import math
 import ast
 import time
-import re 
-import json 
 import pandas as pd
-import sys 
 import random 
 import streamlit as st
 
@@ -18,7 +15,7 @@ from spotipy.oauth2 import SpotifyClientCredentials
 # -------------------------------------------------------
 spotify_available = True
 try:
-    from src.utils.KEYS import CLIENT_ID, CLIENT_SECRET
+    from clients.keys.spotify_client_info import CLIENT_ID, CLIENT_SECRET
     try:
         auth_manager = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
         sp = spotipy.Spotify(auth_manager=auth_manager)

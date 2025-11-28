@@ -3,7 +3,7 @@ import math
 import os
 import csv
 from spotipy.oauth2 import SpotifyClientCredentials
-from utils.KEYS import CLIENT_ID, CLIENT_SECRET, DUMMY_ID, DUMMY_SECRET
+from clients.keys.spotify_client_info import CLIENT_ID, CLIENT_SECRET
 
 # --- SETUP ---
 CLIENT_ID = CLIENT_ID

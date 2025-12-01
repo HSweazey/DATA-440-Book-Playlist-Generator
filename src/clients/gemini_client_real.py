@@ -4,10 +4,10 @@ import os
 from .gemini_client_base import GeminiClientBase
 
 class GeminiClientReal(GeminiClientBase):
-    def __init__(self, api_key: str, model="gemini-2.5-flash-lite"):
+    def __init__(self, api_key: str, model = "gemini-2.5-flash-lite"):
         self.api_key = api_key
         self.model = model
-        self.prompt = None      # For interface consistency with dummy client
+        self.prompt = None      
         self.response_data = None
 
     def set_request(self, prompt: str):
@@ -19,7 +19,6 @@ class GeminiClientReal(GeminiClientBase):
         if not self.prompt:
             raise ValueError("Prompt not set. Call set_request(prompt) first.")
 
-        # Pass API key via environment variable
         env = os.environ.copy()
         env["GEMINI_API_KEY"] = self.api_key
 
@@ -37,7 +36,8 @@ class GeminiClientReal(GeminiClientBase):
             print(f"Error calling Gemini API: {e}")
             print(f"STDOUT: {e.stdout}")
             print(f"STDERR: {e.stderr}")
-            # fallback for testing
+            
+            # Hard fallback option to match dummy client format 
             self.response_data = {"response": "['ambient', 'ethereal', 'cinematic']"}
         except json.JSONDecodeError as e:
             print(f"Error parsing Gemini output as JSON: {e}")

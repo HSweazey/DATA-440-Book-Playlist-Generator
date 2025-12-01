@@ -11,7 +11,7 @@ class GeminiClientDummy(GeminiClientBase):
         self.response_data = None
 
     def set_request(self, prompt: str):
-        self.prompt = prompt  # not used, but needed for symmetry
+        self.prompt = prompt  
 
     def send_request(self):
         try:

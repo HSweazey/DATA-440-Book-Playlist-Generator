@@ -1,10 +1,8 @@
-# src/clients/gemini_loader.py
 import os
 import json
 from .gemini_client_real import GeminiClientReal
 from .gemini_client_dummy import GeminiClientDummy
 
-# Path to JSON file containing real Gemini API key
 KEY_FILE = "src/processing/keys/gemini_key.json"
 
 
@@ -44,7 +42,6 @@ def load_gemini_client():
     print("⚠️ No real key found — using DUMMY Gemini client")
     client = GeminiClientDummy()
 
-    # Ensure dummy get_result always returns a dict
     original_get_result = client.get_result
 
     def get_result_dict():

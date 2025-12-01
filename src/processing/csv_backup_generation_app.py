@@ -4,11 +4,9 @@ Creates a playlist from backup CSVs if Spotify API fails or credentials are miss
 """
 
 import os
-import random
 import math
 import pandas as pd
 
-# Paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 

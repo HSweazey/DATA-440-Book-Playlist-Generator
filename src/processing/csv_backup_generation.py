@@ -4,11 +4,9 @@ Creates a playlist from backup CSVs if Spotify API fails or credentials are miss
 """
 
 import os
-import random
 import math
 import pandas as pd
 
-# Paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 
@@ -33,7 +31,7 @@ GENRE_MAP = {
     "t": "textbook_backup.csv",
     "th": "thriller_backup.csv",
     "ya": "young_adult_backup.csv",
-    "o": DEFAULT_GENRE,  # 'other' falls back to instrumental
+    "o": DEFAULT_GENRE, 
 }
 
 def compute_playlist_length(total_pages: int = 100, current_page: int = 0):

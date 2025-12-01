@@ -1,7 +1,6 @@
 import math
 import ast
 import time
-import pandas as pd
 import random 
 import streamlit as st
 

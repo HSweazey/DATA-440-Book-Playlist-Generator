@@ -1,14 +1,12 @@
-import math
 import ast
 import time
 import pandas as pd
 from dummy_csv_prompting import generate_genre_keywords
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-from clients.keys.spotify_client_info import CLIENT_ID, CLIENT_SECRET
+from src.processing.keys.spotify_client_info import CLIENT_ID, CLIENT_SECRET
 import sys
-import re
-import os # Added for path and directory operations
+import os 
 
 # -------------------------------------------------------
 # SPOTIFY SETUP (Using credentials from KEYS.py)

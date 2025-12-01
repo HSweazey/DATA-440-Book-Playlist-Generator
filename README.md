@@ -19,7 +19,7 @@ Songs are selected based on genre, mood, or keywords derived from Gemini.
 
 ---
 
-# 🚀🔑 Quickstart Guide 🔑🚀
+# 🚀🔑 Quick Start Guide 🔑🚀
 
 ### 1. Clone the Repository 
 ```python
@@ -36,7 +36,7 @@ cd FINAL
 
 Open: 
 ```python
-src/clients/keys/spotify_client_info.py
+src/processing/keys/spotify_client_info.py
 ```
 Replace Placeholders: 
 ```python
@@ -48,7 +48,7 @@ CLIENT_SECRET = "<your-spotify-client-secret>"
 
 Open: 
 ```python
-src/clients/keys/gemini_key.json
+src/processing/keys/gemini_key.json
 ```
 Replace Placeholder: 
 ```python
@@ -58,20 +58,25 @@ Replace Placeholder:
 
 ```
 
+**Note:** For the Spotfiy and Gemini keys, you must take care to make ONLY the edits specified. Any changes to the format of these files will create errors preventing playlist generation. 
+
+
 ### 4. Run the Program 
 ```python
 uv run src/main.py
 ```
 
+**Using a virtual environment, the program will redirect you to an app interface where...**
+
 **You will be prompted for:**
 - Book title
 - Author
-- Optional page count
+- (Optional) page count
 
 **The pipeline will automatically decide whether to use:**
 - Real Spotify + real Gemini
 - Real Spotify + dummy Gemini
-- Backup CSVs + dummy Gemini
+- Backup CSVs based on genre
 
 ---
 
@@ -93,7 +98,7 @@ uv run src/main.py
 #### 5. Playlist generation logic:
 - Maps book → genre
 - Estimates reading time
-- Assembles tracks whose total duration is within ±10% of the target
+- Assembles tracks whose total duration is within 10% of the target runtime
 
 #### 6. Output:
 - A genre-aligned playlist printed to console and optionally saved to /playlist storage/.
@@ -124,16 +129,8 @@ FINAL/
 │   ├── thriller_backup.csv
 │   └── young_adult_backup.csv
 │
-├── playlist storage/
-│   └── # all playlists generated during testing 
-│
 ├── src/
 │   ├── clients/
-│   │   ├── keys/
-│   │   │   ├── dummy_gemini.json
-│   │   │   ├── gemini_key.json
-│   │   │   └── spotify_client_info.py
-│   │   │   
 │   │   ├── gemini_client_base.py
 │   │   ├── gemini_client_dummy.py
 │   │   ├── gemini_client_real.py
@@ -145,6 +142,11 @@ FINAL/
 │   │   └── spotify_extract_v2.py
 │   │
 │   ├── processing/
+│   │   ├── keys/
+│   │   │   ├── dummy_gemini.json
+│   │   │   ├── gemini_key.json
+│   │   │   └── spotify_client_info.py
+│   │   │   
 │   │   ├── csv_backup_generation_app.py
 │   │   ├── csv_backup_generation.py
 │   │   ├── generate_playlist_csv_app.py
@@ -153,23 +155,12 @@ FINAL/
 │   │   ├── generate_playlist_input.py
 │   │   └──holder.py
 │   │
-│   ├── recycling_bin/
-│   │   └── # old functions kept for reference and documentation (disregard) 
-│   │
-│   ├── utils/
-│   │   ├── io_utils.py
-│   │   └── config.py
-│   │
-│   └── main.py
+│   └── utils/
+│       ├── io_utils.py
+│       └── config.py
 │
 ├── app.py
-├── test_main.py
-│
-├── outline.md
-├── README.md
-│
-├── pyproject.toml
-└── uv.lock
+└── test_main.py
 
 ```
 
@@ -181,11 +172,41 @@ USER RUNS: main.py
 │
 └──→ Check if Spotify CLIENT_ID and CLIENT_SECRET exist  
        │
-       ├── NO → Use backup CSV playlists (generate_playlist_csv.py)
+       ├── if NO → Use backup CSV playlists (generate_playlist_csv.py)
        │
-       └── YES → Check Gemini API key  
+       └── if YES → Check Gemini API key  
                 │
-                ├── NO → Use dummy Gemini + real Spotify
+                ├── if NO → Use dummy Gemini + real Spotify
+                │       │
+                │       └── optional: change dummy keywords in dummy_gemini.json 
+                │           (see 'OPTIONAL Dummy Customization' below)
                 │
-                └── YES → Full pipeline (Gemini + Spotify)
+                └── if YES → Full pipeline (Gemini + Spotify)
 ```
+
+### OPTIONAL Dummy Customization
+
+When the Gemini key is missing or disabled, but all other keys exist, this program uses a dummy response to protect playlist creation and prevent crashes. 
+
+If you want this dummy response to match a specific theme or mood, you can change the keywords listed in the dummy response file. HOWEVER, you must take care to ONLY change the keywords and make no other changes to the formatting of this file. The number of keywords must always equal five and be written in all lowercase with no additional characters. Any changes to the format of this file will create errors preventing playlist generation in the absence of a valid Gemini key. 
+
+
+Open: 
+```python
+src/processing/keys/dummy_gemini.json
+```
+Current dummy response: 
+```python
+{
+  "response": "{'mood_keywords': ['orchestral', 'ethereal', 'cinematic', 'lofi', 'symphony']}"
+}
+```
+
+Example format for edited dummy response: 
+```python
+{
+  "response": "{'mood_keywords': ['word1', 'word2', 'word3', 'word4', 'word5']}"
+}
+```
+
+---

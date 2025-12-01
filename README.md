@@ -153,7 +153,7 @@ FINAL/
 │   │   ├── generate_playlist_csv.py
 │   │   ├── generate_playlist_input_app.py
 │   │   ├── generate_playlist_input.py
-│   │   └──holder.py
+│   │   └── holder.py
 │   │
 │   └── utils/
 │       ├── io_utils.py

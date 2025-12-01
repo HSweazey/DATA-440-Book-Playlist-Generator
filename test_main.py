@@ -4,12 +4,12 @@ import os
 import sys
 from streamlit.web import cli as stcli
 
-if __name__ == "__main__":
-    # This mimics the command 'streamlit run app.py'
-    sys.argv = ["streamlit", "run", "app.py"]
-    sys.exit(stcli.main())
+# if __name__ == "__main__":
+#     # This mimics the command 'streamlit run app.py'
+#     sys.argv = ["streamlit", "run", "app.py"]
+#     sys.exit(stcli.main())
 
-#generate_playlist() #<-- For running
+generate_playlist() #<-- For running
 
 # folder = "data"   # <-- update this
 

@@ -13,7 +13,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 
 
-from clients.keys.spotify_client_info import CLIENT_ID, CLIENT_SECRET 
+from src.processing.keys.spotify_client_info import CLIENT_ID, CLIENT_SECRET 
 
 # -------------------------------------------------------
 # SPOTIFY SETUP
@@ -21,7 +21,7 @@ from clients.keys.spotify_client_info import CLIENT_ID, CLIENT_SECRET
 spotify_available = True
 try:
     # Ensure all necessary imports are available if keys are found
-    from clients.keys.spotify_client_info import CLIENT_ID, CLIENT_SECRET
+    from src.processing.keys.spotify_client_info import CLIENT_ID, CLIENT_SECRET
     import spotipy
     from spotipy.oauth2 import SpotifyClientCredentials
 

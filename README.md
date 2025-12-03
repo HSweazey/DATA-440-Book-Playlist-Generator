@@ -28,7 +28,20 @@ cd FINAL
 ```
 
 ### 2. Install Dependencies 
-- We use uv to manage the python environment
+
+**Installing UV**
+
+This project is managed using UV, the link to which you can find [here](https://docs.astral.sh/uv/guides/install-python/).
+
+Once you've properly installed UV, download the project and set it to your machine's directory. Then, run these commands to download dependencies and start the program.
+
+```bash
+uv sync
+uv run main.py
+```
+
+If you need any troubleshooting assitance, refer to [UV's documentation](https://docs.astral.sh/uv/guides/install-python/).
+
 
 
 ### 3. Insert Your API Keys 
@@ -63,7 +76,7 @@ Replace Placeholder:
 
 ### 4. Run the Program 
 ```python
-uv run src/main.py
+uv run main.py
 ```
 
 **Using a virtual environment, the program will redirect you to an app interface where...**
@@ -93,7 +106,7 @@ uv run src/main.py
 - The system fetches real track data matching those themes.
 
 #### 4. If not:
-- It automatically falls back to genre-based CSV backups containing pre-collected Spotify songs.
+- It automatically falls back to genre-based CSV backups containing pre-collected Spotify songs. Prompts user for genre of book.
 
 #### 5. Playlist generation logic:
 - Maps book → genre
@@ -101,7 +114,7 @@ uv run src/main.py
 - Assembles tracks whose total duration is within 10% of the target runtime
 
 #### 6. Output:
-- A genre-aligned playlist printed to console and optionally saved to /playlist storage/.
+- A genre-aligned playlist listed on UI.
 
 
 ---
@@ -136,11 +149,6 @@ FINAL/
 │   │   ├── gemini_client_real.py
 │   │   └── gemini_loader.py
 │   │
-│   ├── data_ingestion/
-│   │   ├── dummy_csv_generation.py
-│   │   ├── dummy_csv_prompting.py
-│   │   └── spotify_extract_v2.py
-│   │
 │   ├── processing/
 │   │   ├── keys/
 │   │   │   ├── dummy_gemini.json
@@ -148,19 +156,15 @@ FINAL/
 │   │   │   └── spotify_client_info.py
 │   │   │   
 │   │   ├── csv_backup_generation_app.py
-│   │   ├── csv_backup_generation.py
 │   │   ├── generate_playlist_csv_app.py
-│   │   ├── generate_playlist_csv.py
-│   │   ├── generate_playlist_input_app.py
-│   │   ├── generate_playlist_input.py
-│   │   └── holder.py
+│   │   └── generate_playlist_input_app.py
 │   │
 │   └── utils/
 │       ├── io_utils.py
 │       └── config.py
 │
 ├── app.py
-└── test_main.py
+└── main.py
 
 ```
 
@@ -172,7 +176,7 @@ USER RUNS: main.py
 │
 └──→ Check if Spotify CLIENT_ID and CLIENT_SECRET exist  
        │
-       ├── if NO → Use backup CSV playlists (generate_playlist_csv.py)
+       ├── if NO → Use backup CSV playlists (generate_playlist_csv_app.py)
        │
        └── if YES → Check Gemini API key  
                 │

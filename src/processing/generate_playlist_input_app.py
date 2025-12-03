@@ -1,6 +1,6 @@
 import os
 import ast 
-import streamlit as st 
+import streamlit as st
 from src.clients.gemini_loader import load_gemini_client 
 
 LINE_BREAK = '-' * 50 + '\n'
@@ -16,7 +16,7 @@ def generate_playlist_input(book=None, author=None, total_pages=0, suppress_inpu
 
     Your response must be a single Python dictionary with the following keys:
     1. 'mood_keywords': A list of exactly five unique, lowercase, descriptive mood and style keywords that capture the story's tone and atmosphere. These keywords will be used to search for instrumental ambient music.
-    2. 'score_query': (OPTIONAL) If the book has a well-known movie or TV adaptation whose soundtrack is on Spotify, include this key with the official name of the instrumental score or soundtrack album. If NO adaptation soundtrack exists on Spotify, omit this key entirely.
+    2. 'score_query': (OPTIONAL) If the book has a well-known movie or TV adaptation, include this key with the official name of the instrumental score or soundtrack album. It CANNOT be a Broadway Musical Recording. If NO adaptation exists, omit this key entirely.
     3. 'composer_name': (CONDITIONAL) If you include 'score_query', you **must** include this key with the primary composer's full name (e.g., 'Hans Zimmer', 'Max Richter'). Omit this key if 'score_query' is omitted.
 
     Respond **ONLY as a single-line Python dictionary** without any extra characters or words.
@@ -24,37 +24,37 @@ def generate_playlist_input(book=None, author=None, total_pages=0, suppress_inpu
     Example (With Score): {{'mood_keywords': ['heroic', 'epic', 'grand', 'cinematic', 'intense'], 'score_query': 'Dune Soundtrack 2021', 'composer_name': 'Hans Zimmer'}}
     """
     
-    # --- Client Loading ---
+    # Client Loading
     try:
         client = load_gemini_client() 
-        client.prompt = prompt 
+        client.prompt = prompt
     except Exception as e:
         st.error(f"❌ Gemini Load Error: Failed to instantiate client. Check dependencies. Details: {e}")
         return {}
 
-    st.toast("DEBUG: Attempting to send request to Gemini CLI...", icon='⚙️')
+    st.toast("Consulting the AI Librarian...", icon='🧠')
 
-    # --- Send Request ---
+    # Send Request
     try:
         try:
             client.set_request(prompt)
         except AttributeError:
             client.prompt = prompt
 
-        client.send_request() 
+        client.send_request()
     except Exception as e:
         st.error(f"❌ Gemini Subprocess Error: Failed to execute 'gemini' CLI tool. Details: {e}")
         return {}
 
-    st.toast("DEBUG: Successfully received response from Gemini CLI.", icon='✅')
+    st.toast("AI Analysis Complete! Keywords Generated.", icon='✅')
 
-    # --- Get Result ---
+    # Results
     try:
         result = client.get_result()
     except Exception:
         result = {"response": None}
 
-    # --- Robust Parsing ---
+    # Output Parsing
     text_output = "{}" 
     try:
         candidates = result.get("candidates", [])
@@ -83,25 +83,23 @@ def generate_playlist_input(book=None, author=None, total_pages=0, suppress_inpu
         print(text_output)
         print(LINE_BREAK)
 
-    # --- DEBUG CAPTURE: Store Gemini Output ---
     st.session_state['debug_info']['gemini_raw'] = text_output
     
     try:
-        # Use literal_eval to safely parse the output dictionary
         parsed_dict = ast.literal_eval(text_output)
         
+        # Formatting
         moods = parsed_dict.get('mood_keywords', 'N/A')
         score = parsed_dict.get('score_query', 'N/A')
-        composer = parsed_dict.get('composer_name', 'N/A') # <--- FIX: Extract Composer
+        composer = parsed_dict.get('composer_name', 'N/A')
         
         st.session_state['debug_info']['gemini_parsed'] = {
             "Mood Keywords": ", ".join(moods) if isinstance(moods, list) else moods,
             "Score Query": score,
-            "Composer": composer # <--- FIX: Add to debug dictionary
+            "Composer": composer
         }
     except Exception:
         st.session_state['debug_info']['gemini_parsed'] = "Error: Failed to parse output into a dictionary."
-    # --- END DEBUG CAPTURE ---
     
     return {
         "response": text_output,

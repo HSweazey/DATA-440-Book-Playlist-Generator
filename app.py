@@ -114,7 +114,7 @@ if submitted:
         # Clear previous debug info on new submit
         st.session_state['debug_info'] = {}
 
-        with st.spinner(f"Generating playlist..."):
+        with st.spinner(f"Curating your perfect reading soundtrack..."):
             final_tracks = get_final_tracks(book_title, author_name, page_count)
 
         # CHECK FOR FAILURE STATUS
@@ -127,59 +127,17 @@ if submitted:
             # Success!
             st.session_state['fallback_needed'] = False # Reset
             
-            # --- DEBUG DISPLAY RESTORED ---
+            # --- AESTHETIC STATUS UPDATES (No more debug menu) ---
             if 'gemini_parsed' in st.session_state['debug_info']:
                 g_info = st.session_state['debug_info']['gemini_parsed']
                 if isinstance(g_info, dict):
-                    st.toast(f"✅ Gemini Moods: {g_info.get('Mood Keywords', 'N/A')}", icon='🧠')
-                else:
-                    st.toast(f"❌ Gemini Error: {g_info}", icon='⚠️')
-                
-            if 'spotify_query' in st.session_state['debug_info']:
-                s_info = st.session_state['debug_info']
-                st.toast(f"🎵 Spotify: Found {s_info.get('tracks_returned', 0)} tracks using '{s_info.get('successful_attempt', 'N/A')}'", icon='🎶')
-
-            with st.expander("🛠️ Debug Information (Pipeline Metrics)"):
-                debug_info = st.session_state.get('debug_info', {})
-                target_metrics = debug_info.get('target_metrics', {})
-                
-                st.subheader("⏱️ Read Time & Target Metrics")
-                col1, col2 = st.columns(2)
-                with col1: st.metric("Target Read Time", f"{target_metrics.get('target_read_time_min', '0')} min")
-                with col2: st.metric("Target Track Count", target_metrics.get('num_tracks_target', '0'))
-                
-                st.markdown("---")
-                st.subheader("🧠 Gemini Output")
-                gemini_output = debug_info.get('gemini_parsed', {'status': 'Error: Not available'})
-                if isinstance(gemini_output, dict): st.json(gemini_output)
-                else: st.code(str(gemini_output))
-
-                st.markdown("---")
-                st.subheader("🎵 Track Generation Log")
-                search_log = debug_info.get('search_log', [])
-                
-                if search_log:
-                    # FIX: Create DataFrame explicitly and force types to ensure display
-                    df_log = pd.DataFrame(search_log)
-                    
-                    # Ensure "Tracks Added" is treated as a number
-                    if "Tracks Added" in df_log.columns:
-                        df_log["Tracks Added"] = df_log["Tracks Added"].astype(int)
-
-                    st.dataframe(
-                        df_log,
-                        width=800,
-                        hide_index=True,
-                        column_config={
-                            "Source": st.column_config.TextColumn("Source (Search Type)"),
-                            "Query": st.column_config.TextColumn("Spotify Query Used"),
-                            "Tracks Added": st.column_config.NumberColumn("Tracks Selected", format="%d")
-                        }
-                    )
-                else:
-                    st.info("No search logs available.")
-                st.caption(f"Final Playlist Length: {debug_info.get('post_adjustment_length', 0)} tracks")
-            # --- DEBUG DISPLAY END ---
+                    moods = g_info.get('Mood Keywords', 'N/A')
+                    st.toast(f"🧠 AI Vibes Detected: {moods}", icon='✨')
+            
+            if 'target_metrics' in st.session_state['debug_info']:
+                metrics = st.session_state['debug_info']['target_metrics']
+                count = metrics.get('num_tracks_target', 0)
+                st.toast(f"🎯 Target: {count} tracks for your reading session.", icon='📖')
 
             display_export_buttons(final_tracks, book_title)
             st.markdown("---")

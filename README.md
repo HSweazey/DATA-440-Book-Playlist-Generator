@@ -57,7 +57,7 @@ CLIENT_ID = "<your-spotify-client-id>"
 CLIENT_SECRET = "<your-spotify-client-secret>"
 ```
 
-For step-by-step instructions on creating your Spotify Client ID and Client Secret, see [Spotify's documentation](https://developer.spotify.com/documentation/web-api/concepts/apps). Before linking a Client ID and Client Secret to your account, you must have a Spotify account. You can create an account for free through [Spotify's website](https://www.spotify.com/us/free/?gclsrc=aw.ds&gad_source=1&gad_campaignid=1072719584&gbraid=0AAAAADfzDs2V6KHTEtEfksLNZSK4Oil0i&gclid=CjwKCAiA3L_JBhAlEiwAlcWO5xdTF-smDbsv4_mAEQttD4mvQrfaetxOw6RrPsf1vovU1ZOzIZikwxoCwUwQAvD_BwE). 
+For step-by-step instructions on creating your Spotify Client ID and Client Secret, see [Spotify's documentation](https://developer.spotify.com/documentation/web-api/concepts/apps). Before linking a Client ID and Client Secret to your account, you must have a Spotify account. You can create an account for free through [Spotify's website](https://www.spotify.com/us/free/?gclsrc=aw.ds&gad_source=1&gad_campaignid=1072719584&gbraid=0AAAAADfzDs2V6KHTEtEfksLNZSK4Oil0i&gclid=CjwKCAiA3L_JBhAlEiwAlcWO5xdTF-smDbsv4_mAEQttD4mvQrfaetxOw6RrPsf1vovU1ZOzIZikwxoCwUwQAvD_BwE).
 
 
 **Gemini API Key**
@@ -87,12 +87,12 @@ uv run main.py
 **You will be prompted for:**
 - Book title
 - Author
-- (Optional) page count
+- Page Count (Optional)
 
 **The pipeline will automatically decide whether to use:**
-- Real Spotify + real Gemini
-- Real Spotify + dummy Gemini
-- Backup CSVs based on genre
+- Real Spotify + Real Gemini
+- Real Spotify + Dummy Gemini
+- Backup track lists based on genre
 
 ---
 
@@ -101,23 +101,33 @@ uv run main.py
 #### 1. User Inputs
 - Book title
 - Author
-- Optional total page count 
+- Page Count (Optional)
 
-#### 2. Gemini generates thematic keywords based on the book.
+#### 2. If Gemini API key is available:
+- The system queries Gemini for 5 mood words and (if applicable) a score and composer from a film/TV adaptation
 
-#### 3. If Spotify API keys are available:
+#### 3. If not:
+- Calls on dummy API for hard-coded mood words
+
+#### 4. If Spotify API keys are available:
 - The system fetches real track data matching those themes.
 
-#### 4. If not:
+#### 5. If not:
 - It automatically falls back to genre-based CSV backups containing pre-collected Spotify songs. Prompts user for genre of book.
 
-#### 5. Playlist generation logic:
-- Maps book → genre
+#### 6. Playlist generation logic:
 - Estimates reading time
-- Assembles tracks whose total duration is within 10% of the target runtime
+  - Calculated using **average page reading time * page count**
+  - Default page count of 100 is used if no page count is entered
 
-#### 6. Output:
-- A genre-aligned playlist listed on UI.
+- Queries Gemini for keyword dictionary
+  - **If key/format issue:** returns dummy mood words if there is a key issue
+- Queries Spotify with score and mood words
+  - **If key issue:** prompts user to select genre and pulls from corresponding backup file
+- Assembles tracks whose total duration is within 5 minutes of the target runtime
+
+#### 7. Output:
+- A genre-aligned playlist listed on UI (first six tracks embedding)
 
 
 ---
@@ -173,6 +183,7 @@ FINAL/
 
 ## ⬇️ Error Handling Pipeline 
 
+**Key Failure and Formatting Accounts**
 ```python
 
 USER RUNS: main.py
@@ -190,6 +201,26 @@ USER RUNS: main.py
                 │
                 └── if YES → Full pipeline (Gemini + Spotify)
 ```
+
+**Gemini and Query Handling**
+
+*The following handling considerations are taken provided both keys are inputted and working*
+
+- Prompt Gemini
+
+  - Specifies mood words will be for Spotify query, no musical soundtracks allowed
+  - Checks if a score from TV adaptation of film exists, includes both title of album and composer in response if applicable
+  - Expects python dict as response, built to handle formatting from advanced and normal Gemini models
+    - Defaults to genre approach if format does not fall into either format structure
+  - "Safety Override" feature when Gemini returns mood words that can generate inapproproate content when used with Spotify
+
+- Query Spotify
+  - (If applicable) searches for returned score album and returns 6 tracks
+  - Uses each individual mood keyword alongside "instrumental" and "ambient instrumental"
+    - Divides projected track count evenly between all combinations to return the best (top) tracks from each query
+  - Checks for duplicate tracks, removes and replaces any if found
+  - Calculates actual playlist length from combined durations of tracks, adds or removes tracks to get within 5 minutes of projected reading time
+  
 
 ### OPTIONAL Dummy Customization
 

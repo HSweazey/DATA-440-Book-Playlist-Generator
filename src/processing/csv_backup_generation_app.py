@@ -10,10 +10,10 @@ import pandas as pd
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 
-# Fallback genre
+# Fallback Genre
 DEFAULT_GENRE = "instrumental"
 
-# 1. Internal Map: Code -> Filename
+# 1. User Input Mapping
 GENRE_MAP = {
     "b": "biography_backup.csv",
     "c": "classics_backup.csv",
@@ -33,7 +33,7 @@ GENRE_MAP = {
     "o": "instrumental_backup.csv", 
 }
 
-# 2. UI Map: Readable Name -> Code (For the Dropdown)
+# 2. UI Dropdown Menu
 UI_GENRE_OPTIONS = {
     "Instrumental / Other": "o",
     "Biography": "b",
@@ -90,7 +90,6 @@ def generate_backup_playlist(total_pages: int = 250, genre_code: str = 'o'):
     filename = GENRE_MAP.get(genre_code, GENRE_MAP["o"])
     df = _safe_load_csv(filename)
     
-    # Fallback to instrumental if specific CSV is broken
     if df is None or df.empty:
         if filename != "instrumental_backup.csv": 
             print("⚠️ Selected genre CSV is empty. Falling back to instrumental.")

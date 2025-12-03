@@ -9,9 +9,7 @@ from src.processing.generate_playlist_input_app import generate_playlist_input
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 
-# -------------------------------------------------------
-# SPOTIFY SETUP
-# -------------------------------------------------------
+# Spotify Setup
 spotify_available = True
 try:
     from src.processing.keys.spotify_client_info import CLIENT_ID, CLIENT_SECRET
@@ -40,10 +38,10 @@ FALLBACK_GENRE = 'classical'
 MAX_SCORE_PERCENTAGE = 0.15 
 DURATION_THRESHOLD_MS = 5 * 60 * 1000 
 
-# --- HELPER FUNCTIONS ---
+# Helper Functions
 def create_track_fingerprint(track: dict) -> str:
     title = track.get('name', 'Unknown').lower()
-    # Handle simplified track objects (from album_tracks) vs full track objects
+    
     if 'artists' in track:
         artist_name = track['artists'][0]['name'].lower()
     else:
@@ -76,7 +74,7 @@ def validate_and_extract_parameters(gemini_response_str: str) -> dict | None:
     except Exception:
         return None
 
-    # Safety Check
+    # Unsafe Words
     SAFETY_TRIGGER_KEYWORDS = ['romantic', 'romance', 'sexy', 'erotic', 'intimate', 'passion', 'love', 'passionate']
     safety_override = False 
     all_keywords_string = " ".join([str(k).lower().strip() for k in mood_keywords])
@@ -87,8 +85,8 @@ def validate_and_extract_parameters(gemini_response_str: str) -> dict | None:
     composer_name = params.get('composer_name', '')
     
     # Terminal Debug
-    if score_query:
-        print(f"DEBUG: Extracted Score: '{score_query}' | Composer: '{composer_name}'")
+    # if score_query:
+    #     print(f"DEBUG: Extracted Score: '{score_query}' | Composer: '{composer_name}'")
     
     return {
         'mood_keywords_string': all_keywords_string, 
@@ -99,7 +97,6 @@ def validate_and_extract_parameters(gemini_response_str: str) -> dict | None:
 
 def _build_query(primary_keywords: str, query_type: str, composer_name: str = '') -> str:
     if query_type == "score":
-        # For Album/Score search, less is often more.
         if composer_name:
             return f'{primary_keywords} {composer_name}'.strip()
         return primary_keywords.strip()
@@ -215,31 +212,27 @@ def fetch_score_tracks(score_query: str, num_tracks: int, composer_name: str = '
     2. If YES: Pull tracks from that Album.
     3. If NO: Return empty (so we default to Mood Search).
     """
-    # Build a search query optimized for ALBUMS
+    # Album Query
     search_terms = _build_query(score_query, "score", composer_name)
     print(f"DEBUG: Checking for Album with query: '{search_terms}'")
 
     try:
-        # 1. THE CHECK: Search for an Album
+        # 1. Check if Album Exists
         album_results = sp.search(q=search_terms, type='album', limit=1)
         
         if album_results and album_results['albums']['items']:
-            # ALBUM FOUND!
             best_album = album_results['albums']['items'][0]
             album_id = best_album['id']
             album_name = best_album['name']
             print(f"DEBUG: ✅ Score Found! Using Album: {album_name} ({album_id})")
             
-            # 2. PULL FROM SCORE
-            # Get tracks directly from this album
-            # limit=50 ensures we get most tracks from a standard score
+            # 2. Get Score
             album_tracks_resp = sp.album_tracks(album_id, limit=50)
             raw_tracks = album_tracks_resp.get('items', [])
             
-            # Filter/Limit to the budget
             valid_tracks = []
             for track in raw_tracks:
-                # SKIP TRACKS WITH "feat." IN TITLE
+                # Skip ".feat" tracks
                 t_name = track.get('name', '').lower()
                 if "feat." in t_name or "(feat" in t_name:
                     continue
@@ -252,9 +245,8 @@ def fetch_score_tracks(score_query: str, num_tracks: int, composer_name: str = '
                 return valid_tracks, f"Album: {album_name}"
         
         else:
-            # NO ALBUM FOUND
+            # If No Album
             print(f"DEBUG: ❌ No Album found for '{search_terms}'. Skipping score search.")
-            # Return empty list -> logic will go right to Mood Search
             return [], search_terms
 
     except Exception as e:
@@ -295,14 +287,14 @@ def adjust_playlist_duration(tracks: list, target_time_min: float, mood_keywords
     return safe_tracks
 
 def get_final_tracks(book_title: str, author_name: str, total_pages: int):
-    # 1. SPOTIFY CHECK
+    # 1. Spotify Check
     if not spotify_available:
         return {"status": "FAIL_NEED_GENRE", "reason": "Spotify API Keys Missing or Invalid"}
 
     if 'debug_info' not in st.session_state: st.session_state['debug_info'] = {}
     st.session_state['debug_info']['search_log'] = [] 
 
-    # 2. GEMINI CALL
+    # 2. Gemini Call
     try:
         data = generate_playlist_input(
             book=book_title, 
@@ -325,7 +317,7 @@ def get_final_tracks(book_title: str, author_name: str, total_pages: int):
     validated_data = None
     gemini_response_str = data.get("response", "{}")
     
-    # 3. GEMINI PARSING
+    # 3. Gemini Parsing
     for attempt in range(1, 3):
         if attempt == 2:
             try:
@@ -347,13 +339,12 @@ def get_final_tracks(book_title: str, author_name: str, total_pages: int):
     score_query = validated_data['score_query']
     composer_name = validated_data['composer_name']
 
-    # 4. SPOTIFY SEARCH
+    # 4. Spotify Query
     score_budget = min(math.ceil(num_tracks_target * MAX_SCORE_PERCENTAGE), num_tracks_target)
     final_tracks = []
     track_fingerprints = set()
 
     if score_query and score_budget > 0:
-        # Runs the Album-First check strategy
         raw_score_tracks, query = fetch_score_tracks(score_query, score_budget, composer_name) 
         for track in raw_score_tracks:
             if len(final_tracks) >= score_budget: break
@@ -362,8 +353,7 @@ def get_final_tracks(book_title: str, author_name: str, total_pages: int):
                 final_tracks.append(track)
                 track_fingerprints.add(fingerprint)
 
-    # 5. MOOD SEARCH (Fills the rest)
-    # If Score Search returned 0 tracks, this budget automatically expands to cover the full target.
+    # 5. Mood Word Search
     tracks_needed_for_mood = num_tracks_target - len(final_tracks)
     
     if tracks_needed_for_mood > 0:

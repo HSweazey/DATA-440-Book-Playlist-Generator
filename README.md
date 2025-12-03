@@ -57,6 +57,9 @@ CLIENT_ID = "<your-spotify-client-id>"
 CLIENT_SECRET = "<your-spotify-client-secret>"
 ```
 
+For step-by-step instructions on creating your Spotify Client ID and Client Secret, see [Spotify's documentation](https://developer.spotify.com/documentation/web-api/concepts/apps). Before linking a Client ID and Client Secret to your account, you must have a Spotify account. You can create an account for free through [Spotify's website](https://www.spotify.com/us/free/?gclsrc=aw.ds&gad_source=1&gad_campaignid=1072719584&gbraid=0AAAAADfzDs2V6KHTEtEfksLNZSK4Oil0i&gclid=CjwKCAiA3L_JBhAlEiwAlcWO5xdTF-smDbsv4_mAEQttD4mvQrfaetxOw6RrPsf1vovU1ZOzIZikwxoCwUwQAvD_BwE). 
+
+
 **Gemini API Key**
 
 Open: 

@@ -1,6 +1,6 @@
 # 📚🎧 Project Overview 🎧📚
 
-The Book Playlist Generator automatically creates a music playlist that matches the genre and remaining reading time of a book.
+The **Book Playlist Generator** automatically creates a music playlist that matches the genre and remaining reading time of a book.
 The system combines:
 - Large Language Model (LLM) keyword generation via Google’s Gemini API
 - Spotify API track retrieval (with a CSV-based fallback system)
@@ -29,7 +29,7 @@ cd FINAL
 
 ### 2. Install Dependencies 
 
-**Installing UV**
+#### Installing UV
 
 This project is managed using UV, the link to which you can find [here](https://docs.astral.sh/uv/guides/install-python/).
 
@@ -45,13 +45,13 @@ If you need any troubleshooting assitance, refer to [UV's documentation](https:/
 
 
 ### 3. Insert Your API Keys 
-**Spotify API Keys**
+#### Spotify API Keys
 
-Open: 
+**Open:** 
 ```python
 src/processing/keys/spotify_client_info.py
 ```
-Replace Placeholders: 
+**Replace Placeholders:**
 ```python
 CLIENT_ID = "<your-spotify-client-id>"
 CLIENT_SECRET = "<your-spotify-client-secret>"
@@ -60,13 +60,13 @@ CLIENT_SECRET = "<your-spotify-client-secret>"
 For step-by-step instructions on creating your Spotify Client ID and Client Secret, see [Spotify's documentation](https://developer.spotify.com/documentation/web-api/concepts/apps). Before linking a Client ID and Client Secret to your account, you must have a Spotify account. You can create an account for free through [Spotify's website](https://www.spotify.com/us/free/?gclsrc=aw.ds&gad_source=1&gad_campaignid=1072719584&gbraid=0AAAAADfzDs2V6KHTEtEfksLNZSK4Oil0i&gclid=CjwKCAiA3L_JBhAlEiwAlcWO5xdTF-smDbsv4_mAEQttD4mvQrfaetxOw6RrPsf1vovU1ZOzIZikwxoCwUwQAvD_BwE).
 
 
-**Gemini API Key**
+#### Gemini API Key
 
-Open: 
+**Open:**
 ```python
 src/processing/keys/gemini_key.json
 ```
-Replace Placeholder: 
+**Replace Placeholder:**
 ```python
 {
   "api_key": "YOUR_REAL_KEY_HERE"
@@ -74,7 +74,10 @@ Replace Placeholder:
 
 ```
 
-**Note:** For the Spotfiy and Gemini keys, you must take care to make ONLY the edits specified. Any changes to the format of these files will create errors preventing playlist generation. 
+
+To create your own Gemini Key, use [Gemini API's website](https://ai.google.dev/gemini-api/docs/api-key?gclsrc=aw.ds&gad_source=1&gad_campaignid=20866959509&gbraid=0AAAAACn9t67_UcOr7ckWtvOXljNtzsfl0&gclid=Cj0KCQiA_8TJBhDNARIsAPX5qxSOPEuIt8FXckHDbAJx6PNWLijF3TKjcge1eVXGRcPrEbd_jYNS45AaAjALEALw_wcB). It provides all necessary links and instructions to create and manage your Gemini API Keys from the Google AI Studio API Keys page.
+
+*For the Spotfiy and Gemini keys, you must take care to make ONLY the edits specified. Any changes to the format of these files will create errors preventing playlist generation.* 
 
 
 ### 4. Run the Program 
@@ -183,7 +186,7 @@ FINAL/
 
 ## ⬇️ Error Handling Pipeline 
 
-**Key Failure and Formatting Accounts**
+### Key Failure and Formatting Accounts
 ```python
 
 USER RUNS: main.py
@@ -202,11 +205,11 @@ USER RUNS: main.py
                 └── if YES → Full pipeline (Gemini + Spotify)
 ```
 
-**Gemini and Query Handling**
+### Gemini and Query Handling
 
 *The following handling considerations are taken provided both keys are inputted and working*
 
-- Prompt Gemini
+- **Prompt Gemini**
 
   - Specifies mood words will be for Spotify query, no musical soundtracks allowed
   - Checks if a score from TV adaptation of film exists, includes both title of album and composer in response if applicable
@@ -214,33 +217,34 @@ USER RUNS: main.py
     - Defaults to genre approach if format does not fall into either format structure
   - "Safety Override" feature when Gemini returns mood words that can generate inapproproate content when used with Spotify
 
-- Query Spotify
+- **Query Spotify**
   - (If applicable) searches for returned score album and returns 6 tracks
   - Uses each individual mood keyword alongside "instrumental" and "ambient instrumental"
     - Divides projected track count evenly between all combinations to return the best (top) tracks from each query
   - Checks for duplicate tracks, removes and replaces any if found
   - Calculates actual playlist length from combined durations of tracks, adds or removes tracks to get within 5 minutes of projected reading time
-  
 
-### OPTIONAL Dummy Customization
+ ---
+
+## ⬇️ OPTIONAL Dummy Customization
 
 When the Gemini key is missing or disabled, but all other keys exist, this program uses a dummy response to protect playlist creation and prevent crashes. 
 
 If you want this dummy response to match a specific theme or mood, you can change the keywords listed in the dummy response file. HOWEVER, you must take care to ONLY change the keywords and make no other changes to the formatting of this file. The number of keywords must always equal five and be written in all lowercase with no additional characters. Any changes to the format of this file will create errors preventing playlist generation in the absence of a valid Gemini key. 
 
 
-Open: 
+**Open:**
 ```python
 src/processing/keys/dummy_gemini.json
 ```
-Current dummy response: 
+**Current dummy response:** 
 ```python
 {
   "response": "{'mood_keywords': ['orchestral', 'ethereal', 'cinematic', 'lofi', 'symphony']}"
 }
 ```
 
-Example format for edited dummy response: 
+**Example format for edited dummy response:**
 ```python
 {
   "response": "{'mood_keywords': ['word1', 'word2', 'word3', 'word4', 'word5']}"

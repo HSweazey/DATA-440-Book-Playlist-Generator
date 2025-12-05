@@ -1,6 +1,4 @@
 from src.processing.generate_playlist_csv_app import *
-import pandas as pd
-import os
 import sys
 from streamlit.web import cli as stcli
 

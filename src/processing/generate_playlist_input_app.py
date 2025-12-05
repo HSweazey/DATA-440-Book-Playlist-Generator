@@ -1,4 +1,3 @@
-import os
 import ast 
 import streamlit as st
 from src.clients.gemini_loader import load_gemini_client 

@@ -1,5 +1,4 @@
 import json
-import os
 from .gemini_client_base import GeminiClientBase
 
 DUMMY_DATA_PATH = "src/processing/keys/dummy_gemini.json"

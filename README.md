@@ -69,7 +69,7 @@ src/processing/keys/gemini_key.json
 **Replace Placeholder:**
 ```python
 {
-  "api_key": "YOUR_REAL_KEY_HERE"
+  "api_key": "<your-gemini-key>"
 }
 
 ```
